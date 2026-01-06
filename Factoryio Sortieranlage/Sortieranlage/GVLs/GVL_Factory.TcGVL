@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="GVL_Factory" Id="{f94dbe4e-dbbf-4a59-bf49-b0516712c0ef}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+    // S0 Reset
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bBtnReset'}
+    bBtnReset AT %I*: BOOL;
+    // S1 Start
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bBtnStart'}
+    bBtnStart AT %I*: BOOL;
+    // S2 Stop NC
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bBtnStopNC'}
+    bBtnStopNC AT %I*: BOOL;
+    // S3 Manual
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwManual'}
+    bSwManual AT %I*: BOOL;
+    // S4 Auto
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwAuto'}
+    bSwAuto AT %I*: BOOL;
+    // S5 Emergency stop
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwEmergStopNC'}
+    bSwEmergStopNC AT %I*: BOOL;
+    // B10 LB: At scale entry
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbScaleEntry'}
+    bLbScaleEntry AT %I*: BOOL;
+    // B11 LB: At scale
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbScale'}
+    bLbScale AT %I*: BOOL;
+    // B12 LB: At scale exit
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbScaleExit'}
+    bLbScaleExit AT %I*: BOOL;
+    // B20 LB: At left entry
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbConveyorLeftEntry'}
+    bLbConveyorLeftEntry AT %I*: BOOL;
+    // B21 LB: At exit left
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbConveyorLeftExit'}
+    bLbConveyorLeftExit AT %I*: BOOL;
+    // B30 LB: At forward entry
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbConveyorForwardEntry'}
+    bLbConveyorForwardEntry AT %I*: BOOL;
+    // B31 LB: At exit front
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbConveyorForwardExit'}
+    bLbConveyorForwardExit AT %I*: BOOL;
+    // B40 LB: At right entry
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbConveyorRightEntry'}
+    bLbConveyorRightEntry AT %I*: BOOL;
+    // B41 LB: At exit right
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bLbConveyorRightExit'}
+    bLbConveyorRightExit AT %I*: BOOL;
+    // S100 Band Einlauf ein
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwConveyorFeedOn'}
+    bSwConveyorFeedOn AT %I*: BOOL;
+    // S101 Band Auslauf ein
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwConveyorForwardOn'}
+    bSwConveyorForwardOn AT %I*: BOOL;
+    // S102 Band Auslauf Links ein
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwConveyorLeftOn'}
+    bSwConveyorLeftOn AT %I*: BOOL;
+    // S103 Band Auslauf Rechts ein
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwConveyorRightOn'}
+    bSwConveyorRightOn AT %I*: BOOL;
+    // S104 Band Waage ein
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bSwConveyorScaleOn'}
+    bSwConveyorScaleOn AT %I*: BOOL;
+    // FACTORY I/O (Running)
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bFactoryRunning'}
+    bFactoryRunning AT %I*: BOOL;
+    // FACTORY I/O (Paused)
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bFactoryPaused'}
+    bFactoryPaused AT %I*: BOOL;
+    // FACTORY I/O (Reset)
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.bFactoryReset'}
+    bFactoryReset AT %I*: BOOL;
+    // Gewicht
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.fScaleWeight'}
+    fScaleWeight AT %I*: REAL;
+    // FACTORY I/O (Time Scale)
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.fFactoryTimeScale'}
+    fFactoryTimeScale AT %I*: REAL;
+
+    // H0 Reset light
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bBtnResetLight'}
+    bBtnResetLight AT %Q*: BOOL;
+    // H1 Start light
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bBtnStartLight'}
+    bBtnStartLight AT %Q*: BOOL;
+    // H2 Stop light
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bBtnStopLight'}
+    bBtnStopLight AT %Q*: BOOL;
+    // B0 Alarm Siren
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bAlarmSiren'}
+    bAlarmSiren AT %Q*: BOOL;
+    // H20 Signal Light Red
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bStackLightRed'}
+    bStackLightRed AT %Q*: BOOL;
+    // H21 Signal Light Green
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bStackLightGreen'}
+    bStackLightGreen AT %Q*: BOOL;
+    // H22 Signal Light Yellow
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bStackLightYellow'}
+    bStackLightYellow AT %Q*: BOOL;
+    // M10 Entry conveyor
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bConveyorFeed'}
+    bConveyorFeed AT %Q*: BOOL;
+    // M12 Load scale
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bConveyorScale'}
+    bConveyorScale AT %Q*: BOOL;
+    // M20 Left conveyor
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bConveyorLeft'}
+    bConveyorLeft AT %Q*: BOOL;
+    // M30 Front conveyor
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bConveyorForward'}
+    bConveyorForward AT %Q*: BOOL;
+    // M40 Right conveyor
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bConveyorRight'}
+    bConveyorRight AT %Q*: BOOL;
+    // M50 Send left
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bSorterLeft'}
+    bSorterLeft AT %Q*: BOOL;
+    // M51 Send forward
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bSorterRaise'}
+    bSorterRaise AT %Q*: BOOL;
+    // M52 Send right
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bSorterRight'}
+    bSorterRight AT %Q*: BOOL;
+    // Emitter
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.bEmitter'}
+    bEmitter AT %Q*: BOOL;
+    // Gewicht
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.nDispWeight'}
+    nDispWeight AT %Q*: INT;
+    // Left count
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.nDispCountLeft'}
+    nDispCountLeft AT %Q*: INT;
+    // Forward count
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.nDispCountForward'}
+    nDispCountForward AT %Q*: INT;
+    // Right count
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.nDispCountRight'}
+    nDispCountRight AT %Q*: INT;
+    // FACTORY I/O (Camera Position)
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Inputs^FactoryioConnector.nFactoryCameraPosition'}
+    nFactoryCameraPosition AT %Q*: INT;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

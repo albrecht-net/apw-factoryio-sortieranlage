@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="MAIN" Id="{057ae4a3-2787-4424-9a6b-bc231d52e4b1}">
+  <POU Name="MAIN" Id="{057ae4a3-2787-4424-9a6b-bc231d52e4b1}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
+    bVal: BOOL;
 END_VAR
-]]>
-    </Declaration>
+]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[GVL_Factory.bBtnReset := bVal;
+]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>
