@@ -31,98 +31,98 @@ VAR
     stFactoryioAnalogOutputs: ST_ModbusMapHoldingRegs;
 
     // S0 Reset
-    bBtnReset AT %I*: BOOL;
+    bBtnReset AT %Q*: BOOL;
     // S1 Start
-    bBtnStart AT %I*: BOOL;
+    bBtnStart AT %Q*: BOOL;
     // S2 Stop NC
-    bBtnStopNC AT %I*: BOOL;
+    bBtnStopNC AT %Q*: BOOL;
     // S3 Manual
-    bSwManual AT %I*: BOOL;
+    bSwManual AT %Q*: BOOL;
     // S4 Auto
-    bSwAuto AT %I*: BOOL;
+    bSwAuto AT %Q*: BOOL;
     // S5 Emergency stop
-    bSwEmergStopNC AT %I*: BOOL;
+    bSwEmergStopNC AT %Q*: BOOL;
     // B10 LB: At scale entry
-    bLbScaleEntry AT %I*: BOOL;
+    bLbScaleEntry AT %Q*: BOOL;
     // B11 LB: At scale
-    bLbScale AT %I*: BOOL;
+    bLbScale AT %Q*: BOOL;
     // B12 LB: At scale exit
-    bLbScaleExit AT %I*: BOOL;
+    bLbScaleExit AT %Q*: BOOL;
     // B20 LB: At left entry
-    bLbConveyorLeftEntry AT %I*: BOOL;
+    bLbConveyorLeftEntry AT %Q*: BOOL;
     // B21 LB: At exit left
-    bLbConveyorLeftExit AT %I*: BOOL;
+    bLbConveyorLeftExit AT %Q*: BOOL;
     // B30 LB: At forward entry
-    bLbConveyorForwardEntry AT %I*: BOOL;
+    bLbConveyorForwardEntry AT %Q*: BOOL;
     // B31 LB: At exit front
-    bLbConveyorForwardExit AT %I*: BOOL;
+    bLbConveyorForwardExit AT %Q*: BOOL;
     // B40 LB: At right entry
-    bLbConveyorRightEntry AT %I*: BOOL;
+    bLbConveyorRightEntry AT %Q*: BOOL;
     // B41 LB: At exit right
-    bLbConveyorRightExit AT %I*: BOOL;
+    bLbConveyorRightExit AT %Q*: BOOL;
     // S100 Band Einlauf ein
-    bSwConveyorFeedOn AT %I*: BOOL;
+    bSwConveyorFeedOn AT %Q*: BOOL;
     // S101 Band Auslauf ein
-    bSwConveyorForwardOn AT %I*: BOOL;
+    bSwConveyorForwardOn AT %Q*: BOOL;
     // S102 Band Auslauf Links ein
-    bSwConveyorLeftOn AT %I*: BOOL;
+    bSwConveyorLeftOn AT %Q*: BOOL;
     // S103 Band Auslauf Rechts ein
-    bSwConveyorRightOn AT %I*: BOOL;
+    bSwConveyorRightOn AT %Q*: BOOL;
     // S104 Band Waage ein
-    bSwConveyorScaleOn AT %I*: BOOL;
+    bSwConveyorScaleOn AT %Q*: BOOL;
     // FACTORY I/O (Running)
-    bFactoryRunning AT %I*: BOOL;
+    bFactoryRunning AT %Q*: BOOL;
     // FACTORY I/O (Paused)
-    bFactoryPaused AT %I*: BOOL;
+    bFactoryPaused AT %Q*: BOOL;
     // FACTORY I/O (Reset)
-    bFactoryReset AT %I*: BOOL;
+    bFactoryReset AT %Q*: BOOL;
     // Gewicht
-    fScaleWeight AT %I*: REAL;
+    fScaleWeight AT %Q*: REAL;
     // FACTORY I/O (Time Scale)
-    fFactoryTimeScale AT %I*: REAL;
+    fFactoryTimeScale AT %Q*: REAL;
 
     // H0 Reset light
-    bBtnResetLight AT %Q*: BOOL;
+    bBtnResetLight AT %I*: BOOL;
     // H1 Start light
-    bBtnStartLight AT %Q*: BOOL;
+    bBtnStartLight AT %I*: BOOL;
     // H2 Stop light
-    bBtnStopLight AT %Q*: BOOL;
+    bBtnStopLight AT %I*: BOOL;
     // B0 Alarm Siren
-    bAlarmSiren AT %Q*: BOOL;
+    bAlarmSiren AT %I*: BOOL;
     // H20 Signal Light Red
-    bStackLightRed AT %Q*: BOOL;
+    bStackLightRed AT %I*: BOOL;
     // H21 Signal Light Green
-    bStackLightGreen AT %Q*: BOOL;
+    bStackLightGreen AT %I*: BOOL;
     // H22 Signal Light Yellow
-    bStackLightYellow AT %Q*: BOOL;
+    bStackLightYellow AT %I*: BOOL;
     // M10 Entry conveyor
-    bConveyorFeed AT %Q*: BOOL;
+    bConveyorFeed AT %I*: BOOL;
     // M12 Load scale
-    bConveyorScale AT %Q*: BOOL;
+    bConveyorScale AT %I*: BOOL;
     // M20 Left conveyor
-    bConveyorLeft AT %Q*: BOOL;
+    bConveyorLeft AT %I*: BOOL;
     // M30 Front conveyor
-    bConveyorForward AT %Q*: BOOL;
+    bConveyorForward AT %I*: BOOL;
     // M40 Right conveyor
-    bConveyorRight AT %Q*: BOOL;
+    bConveyorRight AT %I*: BOOL;
     // M50 Send left
-    bSorterLeft AT %Q*: BOOL;
+    bSorterLeft AT %I*: BOOL;
     // M51 Send forward
-    bSorterRaise AT %Q*: BOOL;
+    bSorterRaise AT %I*: BOOL;
     // M52 Send right
-    bSorterRight AT %Q*: BOOL;
+    bSorterRight AT %I*: BOOL;
     // Emitter
-    bEmitter AT %Q*: BOOL;
+    bEmitter AT %I*: BOOL;
     // Gewicht
-    nDispWeight AT %Q*: INT;
+    nDispWeight AT %I*: INT;
     // Left count
-    nDispCountLeft AT %Q*: INT;
+    nDispCountLeft AT %I*: INT;
     // Forward count
-    nDispCountForward AT %Q*: INT;
+    nDispCountForward AT %I*: INT;
     // Right count
-    nDispCountRight AT %Q*: INT;
+    nDispCountRight AT %I*: INT;
     // FACTORY I/O (Camera Position)
-    nFactoryCameraPosition AT %Q*: INT;
+    nFactoryCameraPosition AT %I*: INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
