@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.19" ClassName="CNestedPlcProjDef">
+	<Project GUID="{9B84AC56-4690-4D34-A054-6C1071EF022B}" Name="Sortieranlage" PrjFilePath="..\..\Sortieranlage\Sortieranlage.plcproj" TmcFilePath="..\..\Sortieranlage\Sortieranlage.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
+		<Instance File="Sortieranlage Instance.xti"/>
+	</Project>
+</TcSmItem>

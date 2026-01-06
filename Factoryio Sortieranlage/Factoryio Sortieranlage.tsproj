@@ -9,10 +9,14 @@
 				<Task Id="3" Priority="20" CycleTime="50000" AmsPort="350" AdtTasks="true">
 					<Name>PlcTaskFactoryioConnector</Name>
 				</Task>
+				<Task Id="4" Priority="21" CycleTime="100000" AmsPort="351" AdtTasks="true">
+					<Name>PlcTaskSortieranlage</Name>
+				</Task>
 			</Tasks>
 		</System>
 		<Plc>
 			<Project File="Factoryio.xti"/>
+			<Project File="Sortieranlage.xti"/>
 		</Plc>
 		<Analytics ConfigVersion="1.4">
 			<Name>ANALYTICS</Name>
