@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FactoryioConnector" Id="{307071d9-10a8-4b21-8178-651653349033}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM FactoryioConnector
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
