@@ -18,16 +18,16 @@
     <LibraryReferences>{bb8bd2c0-13b3-42f6-ade6-a0868b0e5961}</LibraryReferences>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="DUTs\ST_MbMapHoldingReg.TcDUT">
+    <Compile Include="DUTs\ST_ModbusMapHoldingRegs.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\ST_MbMapInput.TcDUT">
+    <Compile Include="DUTs\ST_ModbusMapInputs.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\ST_MbMappInputReg.TcDUT">
+    <Compile Include="DUTs\ST_ModbusMapInputRegs.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\ST_MbMapCoil.TcDUT">
+    <Compile Include="DUTs\ST_ModbusMapCoils.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PlcTask.TcTTO">

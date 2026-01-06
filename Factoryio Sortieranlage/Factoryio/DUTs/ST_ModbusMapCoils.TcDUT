@@ -1,65 +1,65 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_MbMapCoil" Id="{5488beb2-0954-4af2-ad86-ef5ab10bcfa8}">
+  <DUT Name="ST_ModbusMapCoils" Id="{5488beb2-0954-4af2-ad86-ef5ab10bcfa8}">
     <Declaration><![CDATA[// Factoryio modbus mapping for digital outputs
-TYPE ST_MbMapCoil:
+TYPE ST_ModbusMapCoils:
 STRUCT
     // H0 Reset light
-    bBtnResetLight: BOOL;
+    bBtnResetLight: BIT;
     // H1 Start light
-    bBtnStartLight: BOOL;
+    bBtnStartLight: BIT;
     // H2 Stop light
-    bBtnStopLight: BOOL;
+    bBtnStopLight: BIT;
     // B0 Alarm Siren
-    bAlarmSiren: BOOL;
+    bAlarmSiren: BIT;
     // H20 Signal Light Red
-    bStackLightRed: BOOL;
+    bStackLightRed: BIT;
     // H21 Signal Light Green
-    bStackLightGreen: BOOL;
+    bStackLightGreen: BIT;
     // H22 Signal Light Yellow
-    bStackLightYellow: BOOL;
+    bStackLightYellow: BIT;
     // M10 Entry conveyor
-    bConveyorFeed: BOOL;
+    bConveyorFeed: BIT;
     // M12 Load scale
-    bConveyorScale: BOOL;
+    bConveyorScale: BIT;
     // M20 Left conveyor
-    bConveyorLeft: BOOL;
+    bConveyorLeft: BIT;
     // M30 Front conveyor
-    bConveyorForward: BOOL;
+    bConveyorForward: BIT;
     // M40 Right conveyor
-    bConveyorRight: BOOL;
+    bConveyorRight: BIT;
     // M50 Send left
-    bSorterLeft: BOOL;
+    bSorterLeft: BIT;
     // M51 Send forward
-    bSorterRaise: BOOL;
+    bSorterRaise: BIT;
     // M52 Send right
-    bSorterRight: BOOL;
+    bSorterRight: BIT;
     // bOut15
     {attribute 'hide'}
-    bOut15: BOOL;
+    bOut15: BIT;
     // bOut16
     {attribute 'hide'}
-    bOut16: BOOL;
+    bOut16: BIT;
     // bOut17
     {attribute 'hide'}
-    bOut17: BOOL;
+    bOut17: BIT;
     // bOut18
     {attribute 'hide'}
-    bOut18: BOOL;
+    bOut18: BIT;
     // bOut19
     {attribute 'hide'}
-    bOut19: BOOL;
+    bOut19: BIT;
     // bOut20
     {attribute 'hide'}
-    bOut20: BOOL;
+    bOut20: BIT;
     // bOut21
     {attribute 'hide'}
-    bOut21: BOOL;
+    bOut21: BIT;
     // bOut22
     {attribute 'hide'}
-    bOut22: BOOL;
+    bOut22: BIT;
     // Emitter
-    bEmitter: BOOL;
+    bEmitter: BIT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

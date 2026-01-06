@@ -3,10 +3,258 @@
   <POU Name="FactoryioConnector" Id="{307071d9-10a8-4b21-8178-651653349033}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM FactoryioConnector
 VAR
+    // IP address of factoryio modbus TCP/IP server
+    sFactoryIPAddr: STRING := '127.0.0.1';
+    // Port number of factoryio modbus TCP/IP server
+    nFactoryTCPPort: UINT := 5502;
+    // Modbus slave ID of factoryio modbus TCP/IP server
+    nFactoryUnitID: BYTE := 1;
+    // Timeout that may not be exceeded by execution of the ADS command
+    tConnectionTimeout: TIME := T#2S;
+
+    // Modbus connection to read digital sensors
+    fbReadInputs: FB_MBReadInputs;
+    // Modbus connection to read analog sensors
+    fbReadInputRegs: FB_MBReadInputRegs;
+    // Modbus connection to control digital actuators
+    fbWriteCoils: FB_MBWriteCoils;
+    // Modbus connection to control analog actuators
+    fbWriteRegs: FB_MBWriteRegs;
+
+    // Factoryio digital input mapping
+    stFactoryioDigitalInputs: ST_ModbusMapInputs;
+    // Factoryio analog input mapping
+    stFactoryioAnalogInputs: ST_ModbusMapInputRegs;
+    // Factoryio digital output mapping
+    stFactoryioDigitalOutputs: ST_ModbusMapCoils;
+    // Factoryio analog output mapping
+    stFactoryioAnalogOutputs: ST_ModbusMapHoldingRegs;
+
+    // S0 Reset
+    bBtnReset AT %I*: BOOL;
+    // S1 Start
+    bBtnStart AT %I*: BOOL;
+    // S2 Stop NC
+    bBtnStopNC AT %I*: BOOL;
+    // S3 Manual
+    bSwManual AT %I*: BOOL;
+    // S4 Auto
+    bSwAuto AT %I*: BOOL;
+    // S5 Emergency stop
+    bSwEmergStopNC AT %I*: BOOL;
+    // B10 LB: At scale entry
+    bLbScaleEntry AT %I*: BOOL;
+    // B11 LB: At scale
+    bLbScale AT %I*: BOOL;
+    // B12 LB: At scale exit
+    bLbScaleExit AT %I*: BOOL;
+    // B20 LB: At left entry
+    bLbConveyorLeftEntry AT %I*: BOOL;
+    // B21 LB: At exit left
+    bLbConveyorLeftExit AT %I*: BOOL;
+    // B30 LB: At forward entry
+    bLbConveyorForwardEntry AT %I*: BOOL;
+    // B31 LB: At exit front
+    bLbConveyorForwardExit AT %I*: BOOL;
+    // B40 LB: At right entry
+    bLbConveyorRightEntry AT %I*: BOOL;
+    // B41 LB: At exit right
+    bLbConveyorRightExit AT %I*: BOOL;
+    // S100 Band Einlauf ein
+    bSwConveyorFeedOn AT %I*: BOOL;
+    // S101 Band Auslauf ein
+    bSwConveyorForwardOn AT %I*: BOOL;
+    // S102 Band Auslauf Links ein
+    bSwConveyorLeftOn AT %I*: BOOL;
+    // S103 Band Auslauf Rechts ein
+    bSwConveyorRightOn AT %I*: BOOL;
+    // S104 Band Waage ein
+    bSwConveyorScaleOn AT %I*: BOOL;
+    // FACTORY I/O (Running)
+    bFactoryRunning AT %I*: BOOL;
+    // FACTORY I/O (Paused)
+    bFactoryPaused AT %I*: BOOL;
+    // FACTORY I/O (Reset)
+    bFactoryReset AT %I*: BOOL;
+    // Gewicht
+    fScaleWeight AT %I*: REAL;
+    // FACTORY I/O (Time Scale)
+    fFactoryTimeScale AT %I*: REAL;
+
+    // H0 Reset light
+    bBtnResetLight AT %Q*: BOOL;
+    // H1 Start light
+    bBtnStartLight AT %Q*: BOOL;
+    // H2 Stop light
+    bBtnStopLight AT %Q*: BOOL;
+    // B0 Alarm Siren
+    bAlarmSiren AT %Q*: BOOL;
+    // H20 Signal Light Red
+    bStackLightRed AT %Q*: BOOL;
+    // H21 Signal Light Green
+    bStackLightGreen AT %Q*: BOOL;
+    // H22 Signal Light Yellow
+    bStackLightYellow AT %Q*: BOOL;
+    // M10 Entry conveyor
+    bConveyorFeed AT %Q*: BOOL;
+    // M12 Load scale
+    bConveyorScale AT %Q*: BOOL;
+    // M20 Left conveyor
+    bConveyorLeft AT %Q*: BOOL;
+    // M30 Front conveyor
+    bConveyorForward AT %Q*: BOOL;
+    // M40 Right conveyor
+    bConveyorRight AT %Q*: BOOL;
+    // M50 Send left
+    bSorterLeft AT %Q*: BOOL;
+    // M51 Send forward
+    bSorterRaise AT %Q*: BOOL;
+    // M52 Send right
+    bSorterRight AT %Q*: BOOL;
+    // Emitter
+    bEmitter AT %Q*: BOOL;
+    // Gewicht
+    nDispWeight AT %Q*: INT;
+    // Left count
+    nDispCountLeft AT %Q*: INT;
+    // Forward count
+    nDispCountForward AT %Q*: INT;
+    // Right count
+    nDispCountRight AT %Q*: INT;
+    // FACTORY I/O (Camera Position)
+    nFactoryCameraPosition AT %Q*: INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[// Read digital sensors
+fbReadInputs(
+    sIPAddr := sFactoryIPAddr,
+    nTCPPort := nFactoryTCPPort,
+    nUnitID := nFactoryUnitID,
+    nQuantity := 24,
+    nMBAddr := 0,
+    cbLength := SIZEOF(stFactoryioDigitalInputs),
+    pDestAddr := ADR(stFactoryioDigitalInputs),
+    tTimeout := tConnectionTimeout
+);
+
+IF NOT fbReadInputs.bBusy THEN
+    // Assign digital sensors to inputs
+    bBtnReset := stFactoryioDigitalInputs.bBtnReset;
+    bBtnStart := stFactoryioDigitalInputs.bBtnStart;
+    bBtnStopNC := stFactoryioDigitalInputs.bBtnStopNC;
+    bSwManual := stFactoryioDigitalInputs.bSwManual;
+    bSwAuto := stFactoryioDigitalInputs.bSwAuto;
+    bSwEmergStopNC := stFactoryioDigitalInputs.bSwEmergStopNC;
+    bLbScaleEntry := stFactoryioDigitalInputs.bLbScaleEntry;
+    bLbScale := stFactoryioDigitalInputs.bLbScale;
+    bLbScaleExit := stFactoryioDigitalInputs.bLbScaleExit;
+    bLbConveyorLeftEntry := stFactoryioDigitalInputs.bLbConveyorLeftEntry;
+    bLbConveyorLeftExit := stFactoryioDigitalInputs.bLbConveyorLeftExit;
+    bLbConveyorForwardEntry := stFactoryioDigitalInputs.bLbConveyorForwardEntry;
+    bLbConveyorForwardExit := stFactoryioDigitalInputs.bLbConveyorForwardExit;
+    bLbConveyorRightEntry := stFactoryioDigitalInputs.bLbConveyorRightEntry;
+    bLbConveyorRightExit := stFactoryioDigitalInputs.bLbConveyorRightExit;
+    bSwConveyorFeedOn := stFactoryioDigitalInputs.bSwConveyorFeedOn;
+    bSwConveyorForwardOn := stFactoryioDigitalInputs.bSwConveyorForwardOn;
+    bSwConveyorLeftOn := stFactoryioDigitalInputs.bSwConveyorLeftOn;
+    bSwConveyorRightOn := stFactoryioDigitalInputs.bSwConveyorRightOn;
+    bSwConveyorScaleOn := stFactoryioDigitalInputs.bSwConveyorScaleOn;
+    bFactoryRunning := stFactoryioDigitalInputs.bFactoryRunning;
+    bFactoryPaused := stFactoryioDigitalInputs.bFactoryPaused;
+    bFactoryReset := stFactoryioDigitalInputs.bFactoryReset;
+
+    // Execute modbus function
+    fbReadInputs.bExecute := TRUE;
+ELSE
+    fbReadInputs.bExecute := FALSE;
+END_IF
+
+// Read analog sensors
+fbReadInputRegs(
+    sIPAddr := sFactoryIPAddr,
+    nTCPPort := nFactoryTCPPort,
+    nUnitID := nFactoryUnitID,
+    nQuantity := 6,
+    nMBAddr := 0,
+    cbLength := SIZEOF(stFactoryioAnalogInputs),
+    pDestAddr := ADR(stFactoryioAnalogInputs),
+    tTimeout := tConnectionTimeout
+);
+
+IF NOT fbReadInputs.bBusy THEN
+    // Assign analog sensors to inputs
+    fScaleWeight := WORD_TO_REAL(stFactoryioAnalogInputs.fScaleWeight) / 100;
+    fFactoryTimeScale := WORD_TO_REAL(stFactoryioAnalogInputs.fFactoryTimeScale) / 100;
+
+    // Execute modbus function
+    fbReadInputRegs.bExecute := TRUE;
+ELSE
+    fbReadInputRegs.bExecute := FALSE;
+END_IF
+
+// Write digital outputs
+fbWriteCoils(
+    sIPAddr := sFactoryIPAddr,
+    nTCPPort := nFactoryTCPPort,
+    nUnitID := nFactoryUnitID,
+    nQuantity := 24,
+    nMBAddr := 0,
+    cbLength := SIZEOF(stFactoryioDigitalOutputs),
+    pSrcAddr := ADR(stFactoryioDigitalOutputs),
+    tTimeout := tConnectionTimeout
+);
+
+IF NOT fbReadInputs.bBusy THEN
+    // Assign outputs to digital actuators
+    stFactoryioDigitalOutputs.bBtnResetLight := bBtnResetLight;
+    stFactoryioDigitalOutputs.bBtnStartLight := bBtnStartLight;
+    stFactoryioDigitalOutputs.bBtnStopLight := bBtnStopLight;
+    stFactoryioDigitalOutputs.bAlarmSiren := bAlarmSiren;
+    stFactoryioDigitalOutputs.bStackLightRed := bStackLightRed;
+    stFactoryioDigitalOutputs.bStackLightGreen := bStackLightGreen;
+    stFactoryioDigitalOutputs.bStackLightYellow := bStackLightYellow;
+    stFactoryioDigitalOutputs.bConveyorFeed := bConveyorFeed;
+    stFactoryioDigitalOutputs.bConveyorScale := bConveyorScale;
+    stFactoryioDigitalOutputs.bConveyorLeft := bConveyorLeft;
+    stFactoryioDigitalOutputs.bConveyorForward := bConveyorForward;
+    stFactoryioDigitalOutputs.bConveyorRight := bConveyorRight;
+    stFactoryioDigitalOutputs.bSorterLeft := bSorterLeft;
+    stFactoryioDigitalOutputs.bSorterRaise := bSorterRaise;
+    stFactoryioDigitalOutputs.bSorterRight := bSorterRight;
+    stFactoryioDigitalOutputs.bEmitter := bEmitter;
+
+    // Execute modbus function
+    fbWriteCoils.bExecute := TRUE;
+ELSE
+    fbWriteCoils.bExecute := FALSE;
+END_IF
+
+// Write analog outputs
+fbWriteRegs(
+    sIPAddr := sFactoryIPAddr,
+    nTCPPort := nFactoryTCPPort,
+    nUnitID := nFactoryUnitID,
+    nQuantity := 6,
+    nMBAddr := 0,
+    cbLength := SIZEOF(stFactoryioAnalogOutputs),
+    pSrcAddr := ADR(stFactoryioAnalogOutputs),
+    tTimeout := tConnectionTimeout
+);
+
+IF NOT fbReadInputs.bBusy THEN
+    // Assign outputs to analog actuators
+    stFactoryioAnalogOutputs.nDispWeight := INT_TO_WORD(nDispWeight);
+    stFactoryioAnalogOutputs.nDispCountLeft := INT_TO_WORD(nDispCountLeft);
+    stFactoryioAnalogOutputs.nDispCountForward := INT_TO_WORD(nDispCountForward);
+    stFactoryioAnalogOutputs.nDispCountRight := INT_TO_WORD(nDispCountRight);
+    stFactoryioAnalogOutputs.nFactoryCameraPosition := INT_TO_WORD(nFactoryCameraPosition);
+
+    // Execute modbus function
+    fbWriteRegs.bExecute := TRUE;
+ELSE
+    fbWriteRegs.bExecute := FALSE;
+END_IF]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

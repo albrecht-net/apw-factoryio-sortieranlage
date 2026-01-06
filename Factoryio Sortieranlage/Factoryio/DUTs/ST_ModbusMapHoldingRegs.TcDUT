@@ -1,22 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_MbMapHoldingReg" Id="{cd84abd8-76ae-43b6-9982-68711ffbfbd2}">
+  <DUT Name="ST_ModbusMapHoldingRegs" Id="{cd84abd8-76ae-43b6-9982-68711ffbfbd2}">
     <Declaration><![CDATA[// Factoryio modbus mapping for analog outputs
-TYPE ST_MbMapHoldingReg:
+TYPE ST_ModbusMapHoldingRegs:
 STRUCT
     // Gewicht
-    nDispWeight: DINT;
+    nDispWeight: WORD;
     // Left count
-    nDispCountLeft: DINT;
+    nDispCountLeft: WORD;
     // Forward count
-    nDispCountForward: DINT;
+    nDispCountForward: WORD;
     // Right count
-    nDispCountRight: DINT;
+    nDispCountRight: WORD;
     // nOut4
     {attribute 'hide'}
-    nOut4: DINT;
+    nOut4: WORD;
     // FACTORY I/O (Camera Position)
-    nFactoryCameraPosition: DINT;
+    nFactoryCameraPosition: WORD;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

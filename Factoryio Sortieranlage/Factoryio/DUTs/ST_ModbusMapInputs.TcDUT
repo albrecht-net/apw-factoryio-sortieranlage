@@ -1,58 +1,58 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_MbMapInput" Id="{66fbb8e0-a2bf-4c31-99b6-30a68e527444}">
+  <DUT Name="ST_ModbusMapInputs" Id="{66fbb8e0-a2bf-4c31-99b6-30a68e527444}">
     <Declaration><![CDATA[// Factoryio modbus mapping for digital inputs
-TYPE ST_MbMapInput:
+TYPE ST_ModbusMapInputs:
 STRUCT
     // S0 Reset
-    bBtnReset: BOOL;
+    bBtnReset: BIT;
     // S1 Start
-    bBtnStart: BOOL;
+    bBtnStart: BIT;
     // S2 Stop NC
-    bBtnStopNC: BOOL;
+    bBtnStopNC: BIT;
     // S3 Manual
-    bSwManual: BOOL;
+    bSwManual: BIT;
     // S4 Auto
-    bSwAuto: BOOL;
+    bSwAuto: BIT;
     // S5 Emergency stop
-    bSwEmergStopNC: BOOL;
+    bSwEmergStopNC: BIT;
     // B10 LB: At scale entry
-    bLbScaleEntry: BOOL;
+    bLbScaleEntry: BIT;
     // B11 LB: At scale
-    bLbScale: BOOL;
+    bLbScale: BIT;
     // B12 LB: At scale exit
-    bLbScaleExit: BOOL;
+    bLbScaleExit: BIT;
     // B20 LB: At left entry
-    bLbConveyorLeftEntry: BOOL;
+    bLbConveyorLeftEntry: BIT;
     // B21 LB: At exit left
-    bLbConveyorLeftExit: BOOL;
+    bLbConveyorLeftExit: BIT;
     // B30 LB: At forward entry
-    bLbConveyorForwardEntry: BOOL;
+    bLbConveyorForwardEntry: BIT;
     // B31 LB: At exit front
-    bLbConveyorForwardExit: BOOL;
+    bLbConveyorForwardExit: BIT;
     // B40 LB: At right entry
-    bLbConveyorRightEntry: BOOL;
+    bLbConveyorRightEntry: BIT;
     // B41 LB: At exit right
-    bLbConveyorRightExit: BOOL;
+    bLbConveyorRightExit: BIT;
     // S100 Band Einlauf ein
-    bSwConveyorFeedOn: BOOL;
+    bSwConveyorFeedOn: BIT;
     // S101 Band Auslauf ein
-    bSwConveyorForwardOn: BOOL;
+    bSwConveyorForwardOn: BIT;
     // S102 Band Auslauf Links ein
-    bSwConveyorLeftOn: BOOL;
+    bSwConveyorLeftOn: BIT;
     // S103 Band Auslauf Rechts ein
-    bSwConveyorRightOn: BOOL;
+    bSwConveyorRightOn: BIT;
     // S104 Band Waage ein
-    bSwConveyorScaleOn: BOOL;
+    bSwConveyorScaleOn: BIT;
     // bIn20
     {attribute 'hide'}
-    bIn20: BOOL;
+    bIn20: BIT;
     // FACTORY I/O (Running)
-    bFactoryRunning: BOOL;
+    bFactoryRunning: BIT;
     // FACTORY I/O (Paused)
-    bFactoryPaused: BOOL;
+    bFactoryPaused: BIT;
     // FACTORY I/O (Reset)
-    bFactoryReset: BOOL;
+    bFactoryReset: BIT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
