@@ -9,7 +9,7 @@
 			</Tasks>
 		</System>
 		<Plc>
-			<Project File="Sortieranlage.xti"/>
+			<Project File="Factoryio.xti"/>
 		</Plc>
 		<Analytics ConfigVersion="1.4">
 			<Name>ANALYTICS</Name>
