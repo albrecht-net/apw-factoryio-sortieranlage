@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MbMappInputReg" Id="{c9aea455-9ef2-4ae7-8ae0-8c170e158fe9}">
+    <Declaration><![CDATA[// Factoryio modbus mapping for analog inputs
+TYPE ST_MbMappInputReg:
+STRUCT
+    // Gewicht
+    fScaleWeight: REAL;
+    // nIn1
+    {attribute 'hide'}
+    nIn1: DINT;
+    // nIn2
+    {attribute 'hide'}
+    nIn2: DINT;
+    // nIn3
+    {attribute 'hide'}
+    nIn3: DINT;
+    // nIn4
+    {attribute 'hide'}
+    nIn4: DINT;
+    // FACTORY I/O (Time Scale)
+    fFactoryTimeScale: REAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

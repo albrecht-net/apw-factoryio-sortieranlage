@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MbMapInput" Id="{66fbb8e0-a2bf-4c31-99b6-30a68e527444}">
+    <Declaration><![CDATA[// Factoryio modbus mapping for digital inputs
+TYPE ST_MbMapInput:
+STRUCT
+    // S0 Reset
+    bBtnReset: BOOL;
+    // S1 Start
+    bBtnStart: BOOL;
+    // S2 Stop NC
+    bBtnStopNC: BOOL;
+    // S3 Manual
+    bSwManual: BOOL;
+    // S4 Auto
+    bSwAuto: BOOL;
+    // S5 Emergency stop
+    bSwEmergStopNC: BOOL;
+    // B10 LB: At scale entry
+    bLbScaleEntry: BOOL;
+    // B11 LB: At scale
+    bLbScale: BOOL;
+    // B12 LB: At scale exit
+    bLbScaleExit: BOOL;
+    // B20 LB: At left entry
+    bLbConveyorLeftEntry: BOOL;
+    // B21 LB: At exit left
+    bLbConveyorLeftExit: BOOL;
+    // B30 LB: At forward entry
+    bLbConveyorForwardEntry: BOOL;
+    // B31 LB: At exit front
+    bLbConveyorForwardExit: BOOL;
+    // B40 LB: At right entry
+    bLbConveyorRightEntry: BOOL;
+    // B41 LB: At exit right
+    bLbConveyorRightExit: BOOL;
+    // S100 Band Einlauf ein
+    bSwConveyorFeedOn: BOOL;
+    // S101 Band Auslauf ein
+    bSwConveyorForwardOn: BOOL;
+    // S102 Band Auslauf Links ein
+    bSwConveyorLeftOn: BOOL;
+    // S103 Band Auslauf Rechts ein
+    bSwConveyorRightOn: BOOL;
+    // S104 Band Waage ein
+    bSwConveyorScaleOn: BOOL;
+    // bIn20
+    {attribute 'hide'}
+    bIn20: BOOL;
+    // FACTORY I/O (Running)
+    bFactoryRunning: BOOL;
+    // FACTORY I/O (Paused)
+    bFactoryPaused: BOOL;
+    // FACTORY I/O (Reset)
+    bFactoryReset: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

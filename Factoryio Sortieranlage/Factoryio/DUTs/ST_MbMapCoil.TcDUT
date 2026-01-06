@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MbMapCoil" Id="{5488beb2-0954-4af2-ad86-ef5ab10bcfa8}">
+    <Declaration><![CDATA[// Factoryio modbus mapping for digital outputs
+TYPE ST_MbMapCoil:
+STRUCT
+    // H0 Reset light
+    bBtnResetLight: BOOL;
+    // H1 Start light
+    bBtnStartLight: BOOL;
+    // H2 Stop light
+    bBtnStopLight: BOOL;
+    // B0 Alarm Siren
+    bAlarmSiren: BOOL;
+    // H20 Signal Light Red
+    bStackLightRed: BOOL;
+    // H21 Signal Light Green
+    bStackLightGreen: BOOL;
+    // H22 Signal Light Yellow
+    bStackLightYellow: BOOL;
+    // M10 Entry conveyor
+    bConveyorFeed: BOOL;
+    // M12 Load scale
+    bConveyorScale: BOOL;
+    // M20 Left conveyor
+    bConveyorLeft: BOOL;
+    // M30 Front conveyor
+    bConveyorForward: BOOL;
+    // M40 Right conveyor
+    bConveyorRight: BOOL;
+    // M50 Send left
+    bSorterLeft: BOOL;
+    // M51 Send forward
+    bSorterRaise: BOOL;
+    // M52 Send right
+    bSorterRight: BOOL;
+    // bOut15
+    {attribute 'hide'}
+    bOut15: BOOL;
+    // bOut16
+    {attribute 'hide'}
+    bOut16: BOOL;
+    // bOut17
+    {attribute 'hide'}
+    bOut17: BOOL;
+    // bOut18
+    {attribute 'hide'}
+    bOut18: BOOL;
+    // bOut19
+    {attribute 'hide'}
+    bOut19: BOOL;
+    // bOut20
+    {attribute 'hide'}
+    bOut20: BOOL;
+    // bOut21
+    {attribute 'hide'}
+    bOut21: BOOL;
+    // bOut22
+    {attribute 'hide'}
+    bOut22: BOOL;
+    // Emitter
+    bEmitter: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
