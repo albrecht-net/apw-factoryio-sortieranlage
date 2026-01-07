@@ -4,10 +4,17 @@
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
     bVal: BOOL;
+    
+    fbBasis: FB_Conveyor;
+    fbNew: FB_Inherite;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[GVL_Factory.bBtnReset := bVal;
+      <ST><![CDATA[IF bVal THEN
+    fbBasis();
+END_IF
+
+fbNew();
 ]]></ST>
     </Implementation>
   </POU>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Conveyor" Id="{245a5808-fce9-4686-b31f-3aa50bc94906}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Conveyor
+VAR_INPUT
+    bEnable: BOOL;
+    bPartAtExit: BOOL;
+END_VAR
+VAR_OUTPUT
+    bConveyorOn: BOOL;
+    bLifesign: BYTE;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bLifesign := bLifesign + 1;
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
