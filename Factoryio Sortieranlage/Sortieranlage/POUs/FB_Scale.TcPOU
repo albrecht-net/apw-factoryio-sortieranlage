@@ -23,7 +23,7 @@ VAR
     // Timeout before store measured weight of part
     fbWeightTimeout: TON;
     fbPartAtExitFalling: F_TRIG();
-    // Current state of feeder
+    // Current state of scale
     eStateScale: (S_IDLE, S_MOVE_PART_TO_SCALE, S_WAIT_FOR_MEASUREMENT, S_EXECUTING_MEASUREMENT, S_WAIT_FOR_FOLLOWER, S_TRANSFER_TO_FOLLOWER, S_LOCKOUT);
 END_VAR
 ]]></Declaration>
