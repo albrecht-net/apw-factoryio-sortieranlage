@@ -15,15 +15,15 @@ END_VAR
 VAR
     // Enable processing of parts
     bEnable: BOOL;
-    // Timer for maximum part moving time on conveyor
-    fbMaxMovingTime: TON;
+    // Part moving timeout
+    fbMovingTimeout: TON;
     // Current state of feeder
     eStateFeeder: (F_IDLE, F_MOVE_PART, F_WAIT_FOR_FOLLOWER, F_TRANSFER_TO_FOLLOWER, F_EMPTY_CONVEYOR, F_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[SUPER^();
-fbMaxMovingTime();
+fbMovingTimeout();
 
 CASE eStateFeeder OF
     F_IDLE:
@@ -35,11 +35,13 @@ CASE eStateFeeder OF
 
     F_MOVE_PART:
         SUPER^.Start();
-        fbMaxMovingTime.IN := TRUE;
-        IF MovePartMonitor() THEN
-            fbMaxMovingTime.IN := FALSE;
-        ELSIF fbMaxMovingTime.Q THEN
+        fbMovingTimeout.IN := TRUE;
+        IF PartAtExit() THEN
+            fbMovingTimeout.IN := FALSE;
+        END_IF
+        IF fbMovingTimeout.Q THEN
             // Throw error message: Part moving timeout
+            fbMovingTimeout.IN := FALSE;
             bEmitter := FALSE;
             eStateFeeder := F_IDLE;
         END_IF
@@ -57,20 +59,30 @@ CASE eStateFeeder OF
 
     F_TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
+        fbMovingTimeout.IN := TRUE;
         IF NOT bPartAtExit AND NOT bEnable THEN
-            eStateFeeder := F_EMPTY_CONVEYOR;
-        ELSIF NOT bPartAtExit THEN
-            eStateFeeder := F_MOVE_PART;
+            fbMovingTimeout.IN := FALSE;
+            IF bEnable THEN
+                eStateFeeder := F_MOVE_PART;
+            ELSE
+                eStateFeeder := F_EMPTY_CONVEYOR;
+            END_IF
+        END_IF
+        IF fbMovingTimeout.Q THEN
+            // Throw error message: Part transfer moving timeout
+            fbMovingTimeout.IN := FALSE;
+            bEmitter := FALSE;
+            eStateFeeder := F_IDLE;
         END_IF
 
     F_EMPTY_CONVEYOR:
         bEmitter := FALSE;
-        fbMaxMovingTime.IN := TRUE;
-        IF MovePartMonitor() THEN
-            fbMaxMovingTime.IN := FALSE;
+        fbMovingTimeout.IN := TRUE;
+        IF PartAtExit() THEN
+            fbMovingTimeout.IN := FALSE;
         END_IF
-        IF fbMaxMovingTime.Q THEN
-            fbMaxMovingTime.IN := FALSE;
+        IF fbMovingTimeout.Q THEN
+            fbMovingTimeout.IN := FALSE;
             eStateFeeder := F_IDLE;
         END_IF
 END_CASE
@@ -90,9 +102,9 @@ END_VAR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="MovePartMonitor" Id="{c7305287-8257-4d92-8802-940a28b7e430}">
+    <Method Name="PartAtExit" Id="{c7305287-8257-4d92-8802-940a28b7e430}">
       <Declaration><![CDATA[// Return TRUE if part reach conveyor exit and state machine will go to next step
-METHOD PRIVATE MovePartMonitor: BOOL
+METHOD PRIVATE PartAtExit: BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -102,25 +114,25 @@ END_VAR
 ELSIF bPartAtExit THEN
     eStateFeeder := F_WAIT_FOR_FOLLOWER;
 ELSE
-    MovePartMonitor := FALSE;
+    PartAtExit := FALSE;
     RETURN;
 END_IF
 
-MovePartMonitor := TRUE;
+PartAtExit := TRUE;
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="tMaxMovingTime" Id="{29a45c02-ab1e-4262-8ddc-dfbb68084338}">
-      <Declaration><![CDATA[// Maximum duration for part to reach exit of conveyor
+    <Property Name="tMovingTimeout" Id="{29a45c02-ab1e-4262-8ddc-dfbb68084338}">
+      <Declaration><![CDATA[// Part moving timeout
 {attribute 'monitoring' := 'call'}
-PROPERTY PUBLIC tMaxMovingTime : TIME
+PROPERTY PUBLIC tMovingTimeout : TIME
 ]]></Declaration>
       <Get Name="Get" Id="{4a60306e-e9b7-4682-8cbb-3a15601b517d}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[tMaxMovingTime := fbMaxMovingTime.PT;
+          <ST><![CDATA[tMovingTimeout := fbMovingTimeout.PT;
 ]]></ST>
         </Implementation>
       </Get>
@@ -129,7 +141,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[fbMaxMovingTime.PT := tMaxMovingTime;
+          <ST><![CDATA[fbMovingTimeout.PT := tMovingTimeout;
 ]]></ST>
         </Implementation>
       </Set>
