@@ -17,6 +17,9 @@ END_VAR
 VAR_OUTPUT
     // Module is ready to receive part
     bReadyToReceivePart: BOOL;
+    // Measurement data is refreshed in this cycle
+    bWeightIsUpdated: BOOL;
+    // Measurement data part weight
     fWeightOut: REAL;
 END_VAR
 VAR
@@ -31,6 +34,8 @@ END_VAR
       <ST><![CDATA[SUPER^();
 fbWeightTimeout();
 fbPartAtExitFalling(CLK := bPartAtExit);
+
+bWeightIsUpdated := FALSE;
 
 CASE eStateScale OF
     S_IDLE:
@@ -56,6 +61,7 @@ CASE eStateScale OF
 
     S_EXECUTING_MEASUREMENT:
         fbWeightTimeout.IN := FALSE;
+        bWeightIsUpdated := TRUE;
         fWeightOut := fWeightIn;
         IF bReleasePartTransfer THEN
             eStateScale := S_TRANSFER_TO_FOLLOWER;
