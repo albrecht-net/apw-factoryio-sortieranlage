@@ -49,7 +49,7 @@ END_CASE
 ]]></ST>
     </Implementation>
     <Method Name="Reset" Id="{c6f9219d-30dc-4aaa-a52b-80bf5ad63bc8}">
-      <Declaration><![CDATA[METHOD PROTECTED Reset
+      <Declaration><![CDATA[METHOD PUBLIC Reset
 VAR_INPUT
 END_VAR
 ]]></Declaration>
