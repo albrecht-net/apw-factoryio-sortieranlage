@@ -13,63 +13,124 @@ VAR_OUTPUT
     bEmitter: BOOL;
 END_VAR
 VAR
-    fbPartAtExitRising: R_TRIG();
-    fbPartAtExitFalling: F_TRIG();
+    // Enable processing of parts
+    bEnable: BOOL;
+    // Timer for maximum part moving time on conveyor
+    fbMaxMovingTime: TON;
     // Current state of feeder
-    eStateFeeder: (F_READY, F_RUNNING, F_MOVE_TO_FOLLOWER, F_WAIT_FOR_FOLLOWER, F_TRANSFER_TO_FOLLOWER, F_LOCKOUT);
+    eStateFeeder: (F_IDLE, F_MOVE_PART, F_WAIT_FOR_FOLLOWER, F_TRANSFER_TO_FOLLOWER, F_EMPTY_CONVEYOR, F_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[SUPER^();
-fbPartAtExitRising(CLK := bPartAtExit);
-fbPartAtExitFalling(CLK := bPartAtExit);
+fbMaxMovingTime();
 
 CASE eStateFeeder OF
-    F_READY:
-        IF stMachineControl.bStart THEN
-            eStateFeeder := F_RUNNING;
+    F_IDLE:
+        SUPER^.Stop(bRunOut := FALSE);
+        IF bEnable THEN
+            bEmitter := TRUE;
+            eStateFeeder := F_MOVE_PART;
         END_IF
 
-    F_RUNNING:
-        bEmitter := TRUE;
+    F_MOVE_PART:
         SUPER^.Start();
-        eStateFeeder := F_MOVE_TO_FOLLOWER;
-
-    F_MOVE_TO_FOLLOWER:
-        IF fbPartAtExitRising.Q AND bReleasePartTransfer THEN
-            eStateFeeder := F_TRANSFER_TO_FOLLOWER;
-        ELSIF fbPartAtExitRising.Q THEN
-            eStateFeeder := F_WAIT_FOR_FOLLOWER;
+        fbMaxMovingTime.IN := TRUE;
+        IF MovePartMonitor() THEN
+            fbMaxMovingTime.IN := FALSE;
+        ELSIF fbMaxMovingTime.Q THEN
+            // Throw error message: Part moving timeout
+            bEmitter := FALSE;
+            eStateFeeder := F_IDLE;
         END_IF
 
     F_WAIT_FOR_FOLLOWER:
         SUPER^.Stop(bRunOut := FALSE);
+        IF NOT bPartAtExit THEN
+            // Throw message: Part was manual removed
+            bEmitter := FALSE;
+            eStateFeeder := F_IDLE;
+        END_IF
         IF bReleasePartTransfer THEN
             eStateFeeder := F_TRANSFER_TO_FOLLOWER;
         END_IF
 
     F_TRANSFER_TO_FOLLOWER:
-        IF NOT fbPartAtExitFalling.Q THEN
-            SUPER^.Start();
-        ELSE
-            SUPER^.Stop(bRunOut := FALSE);
-            eStateFeeder := F_READY;
+        SUPER^.Start();
+        IF NOT bPartAtExit AND NOT bEnable THEN
+            eStateFeeder := F_EMPTY_CONVEYOR;
+        ELSIF NOT bPartAtExit THEN
+            eStateFeeder := F_MOVE_PART;
         END_IF
-        
-    F_LOCKOUT:
-END_CASE]]></ST>
+
+    F_EMPTY_CONVEYOR:
+        bEmitter := FALSE;
+        fbMaxMovingTime.IN := TRUE;
+        IF MovePartMonitor() THEN
+            fbMaxMovingTime.IN := FALSE;
+        END_IF
+        IF fbMaxMovingTime.Q THEN
+            fbMaxMovingTime.IN := FALSE;
+            eStateFeeder := F_IDLE;
+        END_IF
+END_CASE
+
+// Unset enable
+bEnable := FALSE;
+]]></ST>
     </Implementation>
+    <Method Name="Enable" Id="{5968398c-874e-4b04-a814-7d741cce27ab}">
+      <Declaration><![CDATA[// Enable processing of parts
+METHOD Enable: BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bEnable := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MovePartMonitor" Id="{c7305287-8257-4d92-8802-940a28b7e430}">
+      <Declaration><![CDATA[// Return TRUE if part reach conveyor exit and state machine will go to next step
+METHOD PRIVATE MovePartMonitor: BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bPartAtExit AND bReleasePartTransfer THEN
+    eStateFeeder := F_TRANSFER_TO_FOLLOWER;
+ELSIF bPartAtExit THEN
+    eStateFeeder := F_WAIT_FOR_FOLLOWER;
+ELSE
+    MovePartMonitor := FALSE;
+    RETURN;
+END_IF
+
+MovePartMonitor := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="tMaxMovingTime" Id="{29a45c02-ab1e-4262-8ddc-dfbb68084338}">
       <Declaration><![CDATA[// Maximum duration for part to reach exit of conveyor
 {attribute 'monitoring' := 'call'}
 PROPERTY PUBLIC tMaxMovingTime : TIME
 ]]></Declaration>
+      <Get Name="Get" Id="{4a60306e-e9b7-4682-8cbb-3a15601b517d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[tMaxMovingTime := fbMaxMovingTime.PT;
+]]></ST>
+        </Implementation>
+      </Get>
       <Set Name="Set" Id="{ec94b853-c8d5-4b26-9137-79b8d1d43967}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[]]></ST>
+          <ST><![CDATA[fbMaxMovingTime.PT := tMaxMovingTime;
+]]></ST>
         </Implementation>
       </Set>
     </Property>
