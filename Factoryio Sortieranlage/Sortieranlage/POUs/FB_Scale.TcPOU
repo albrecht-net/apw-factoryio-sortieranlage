@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Scale" Id="{3695f822-08b1-4b68-8724-c691d102b138}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Scale EXTENDS FB_Conveyor
+VAR_INPUT
+    // Follower is ready to receive part
+    bReleasePartTransfer: BOOL;
+    // Part is at conveyor entry
+    bPartAtEntry: BOOL;
+    // Part is on scale
+    bPartOnScale: BOOL;
+    // Part is at conveyor exit
+    bPartAtExit: BOOL;
+    // Current weight at scale
+    fWeightIn: REAL;
+END_VAR
+VAR_OUTPUT
+    // Module is ready to receive part
+    bReadyToReceivePart: BOOL;
+    fWeightOut: REAL;
+END_VAR
+VAR
+    // Timeout before store measured weight of part
+    fbWeightTimeout: TON;
+    fbPartAtExitFalling: F_TRIG();
+    // Current state of feeder
+    eStateScale: (S_IDLE, S_MOVE_PART_TO_SCALE, S_WAIT_FOR_MEASUREMENT, S_EXECUTING_MEASUREMENT, S_WAIT_FOR_FOLLOWER, S_TRANSFER_TO_FOLLOWER, S_LOCKOUT);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^();
+fbWeightTimeout();
+fbPartAtExitFalling(CLK := bPartAtExit);
+
+CASE eStateScale OF
+    S_IDLE:
+        SUPER^.Stop(bRunOut := TRUE);
+        bReadyToReceivePart := TRUE;
+        IF bPartAtEntry THEN
+            eStateScale := S_MOVE_PART_TO_SCALE;
+        END_IF
+
+    S_MOVE_PART_TO_SCALE:
+        bReadyToReceivePart := FALSE;
+        SUPER^.Start();
+        IF bPartOnScale THEN
+            eStateScale := S_WAIT_FOR_MEASUREMENT;
+        END_IF
+ 
+    S_WAIT_FOR_MEASUREMENT:
+        SUPER^.Stop(bRunOut := FALSE);
+        fbWeightTimeout.IN := TRUE;
+        IF fbWeightTimeout.Q THEN
+            eStateScale := S_EXECUTING_MEASUREMENT;
+        END_IF
+
+    S_EXECUTING_MEASUREMENT:
+        fbWeightTimeout.IN := FALSE;
+        fWeightOut := fWeightIn;
+        IF bReleasePartTransfer THEN
+            eStateScale := S_TRANSFER_TO_FOLLOWER;
+        ELSE
+            eStateScale := S_WAIT_FOR_FOLLOWER;
+        END_IF
+
+    S_WAIT_FOR_FOLLOWER:
+        IF bReleasePartTransfer THEN
+            eStateScale := S_TRANSFER_TO_FOLLOWER;
+        END_IF
+
+    S_TRANSFER_TO_FOLLOWER:
+        SUPER^.Start();
+        IF fbPartAtExitFalling.Q THEN
+            eStateScale := S_IDLE;
+        END_IF
+END_CASE
+]]></ST>
+    </Implementation>
+    <Property Name="tWaitBeforeMeasure" Id="{124ea750-2d7e-42e4-b4a8-045258bc5dca}">
+      <Declaration><![CDATA[// Timeout before store measured weight of part
+{attribute 'monitoring' := 'call'}
+PROPERTY tWaitBeforeMeasure : TIME
+]]></Declaration>
+      <Get Name="Get" Id="{4045a908-c0fe-448a-b322-dba64860193b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[tWaitBeforeMeasure := fbWeightTimeout.PT;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{367c91d9-efff-434d-b247-9499980309f5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbWeightTimeout.PT := tWaitBeforeMeasure;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>
