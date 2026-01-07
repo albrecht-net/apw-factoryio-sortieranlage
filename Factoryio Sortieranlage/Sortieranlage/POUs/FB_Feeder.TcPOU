@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Feeder" Id="{c5d8e8bc-afa3-42ac-9bb3-50daf9da39ed}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Feeder EXTENDS FB_Conveyor
+VAR_INPUT
+    // Follower is ready to receive part
+    bReleasePartTransfer: BOOL;
+    // Part is at conveyor exit
+    bPartAtExit: BOOL;
+END_VAR
+VAR_OUTPUT
+    // Enable part emitter
+    bEmitter: BOOL;
+END_VAR
+VAR
+    fbPartAtExitRising: R_TRIG();
+    fbPartAtExitFalling: F_TRIG();
+    // Current state of feeder
+    eStateFeeder: (F_READY, F_RUNNING, F_MOVE_TO_FOLLOWER, F_WAIT_FOR_FOLLOWER, F_TRANSFER_TO_FOLLOWER, F_LOCKOUT);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^();
+fbPartAtExitRising(CLK := bPartAtExit);
+fbPartAtExitFalling(CLK := bPartAtExit);
+
+CASE eStateFeeder OF
+    F_READY:
+        IF stMachineControl.bStart THEN
+            eStateFeeder := F_RUNNING;
+        END_IF
+
+    F_RUNNING:
+        bEmitter := TRUE;
+        SUPER^.Start();
+        eStateFeeder := F_MOVE_TO_FOLLOWER;
+
+    F_MOVE_TO_FOLLOWER:
+        IF fbPartAtExitRising.Q AND bReleasePartTransfer THEN
+            eStateFeeder := F_TRANSFER_TO_FOLLOWER;
+        ELSIF fbPartAtExitRising.Q THEN
+            eStateFeeder := F_WAIT_FOR_FOLLOWER;
+        END_IF
+
+    F_WAIT_FOR_FOLLOWER:
+        SUPER^.Stop(bRunOut := FALSE);
+        IF bReleasePartTransfer THEN
+            eStateFeeder := F_TRANSFER_TO_FOLLOWER;
+        END_IF
+
+    F_TRANSFER_TO_FOLLOWER:
+        IF NOT fbPartAtExitFalling.Q THEN
+            SUPER^.Start();
+        ELSE
+            SUPER^.Stop(bRunOut := FALSE);
+            eStateFeeder := F_READY;
+        END_IF
+        
+    F_LOCKOUT:
+END_CASE]]></ST>
+    </Implementation>
+    <Property Name="tMaxMovingTime" Id="{29a45c02-ab1e-4262-8ddc-dfbb68084338}">
+      <Declaration><![CDATA[// Maximum duration for part to reach exit of conveyor
+{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC tMaxMovingTime : TIME
+]]></Declaration>
+      <Set Name="Set" Id="{ec94b853-c8d5-4b26-9137-79b8d1d43967}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

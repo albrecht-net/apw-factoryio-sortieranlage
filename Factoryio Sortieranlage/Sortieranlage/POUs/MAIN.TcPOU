@@ -5,16 +5,25 @@
 VAR
     bVal: BOOL;
     
-    fbBasis: FB_Conveyor;
-    fbNew: FB_Inherite;
+    fbFeeder: FB_Feeder();
+
+    stMachineControl: ST_MachineControl;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF bVal THEN
-    fbBasis();
+      <ST><![CDATA[stMachineControl.bReset := GVL_Factory.bBtnReset;
+stMachineControl.bStart := GVL_Factory.bBtnStart;
+stMachineControl.bStopNC := GVL_Factory.bBtnStopNC;
+stMachineControl.bManual := GVL_Factory.bSwManual;
+stMachineControl.bAuto := GVL_Factory.bSwAuto;
+stMachineControl.bEmergStopNC := GVL_Factory.bSwEmergStopNC;
+
+IF bVal THEN
+    fbFeeder(stMachineControl := stMachineControl, bPartAtExit := NOT GVL_Factory.bLbScaleEntry, bReleasePartTransfer := TRUE);
 END_IF
 
-fbNew();
+GVL_Factory.bEmitter := fbFeeder.bEmitter;
+GVL_Factory.bConveyorFeed := fbFeeder.bConveyorOn;
 ]]></ST>
     </Implementation>
   </POU>
