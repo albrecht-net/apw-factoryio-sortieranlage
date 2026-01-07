@@ -5,11 +5,12 @@
 VAR
     bVal: BOOL;
     
-    fbFeeder: FB_Feeder();
+    fbFeeder: FB_Feeder() := (tMovingTimeout := T#4S);
     fbScale: FB_Scale() := (tStoppingTimeout := T#3S, tWaitBeforeMeasure := T#2S);
+    fbDistributorForward: FB_Distributor() := (tStoppingTimeout := T#3S, tMovingTimeout := T#5S);
 
     stMachineControl: ST_MachineControl;
-	bVal2: BOOL;
+	bReset: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -20,20 +21,25 @@ stMachineControl.bManual := GVL_Factory.bSwManual;
 stMachineControl.bAuto := GVL_Factory.bSwAuto;
 stMachineControl.bEmergStopNC := GVL_Factory.bSwEmergStopNC;
 
-IF bVal THEN
-    fbFeeder(stMachineControl := stMachineControl, bPartAtExit := NOT GVL_Factory.bLbScaleEntry, bReleasePartTransfer := fbScale.bReadyToReceivePart);
-    fbScale(stMachineControl := stMachineControl, bPartAtEntry := NOT GVL_Factory.bLbScaleEntry, bPartOnScale := GVL_Factory.bLbScale, bPartAtExit := GVL_Factory.bLbScaleExit, fWeightIn := GVL_Factory.fScaleWeight);
-END_IF
+fbFeeder(stMachineControl := stMachineControl, bPartAtExit := NOT GVL_Factory.bLbScaleEntryNC, bReleasePartTransfer := fbScale.bReadyToReceivePart);
+fbScale(stMachineControl := stMachineControl, bPartAtEntry := NOT GVL_Factory.bLbScaleEntryNC, bPartOnScale := GVL_Factory.bLbScale, bPartAtExit := GVL_Factory.bLbScaleExit, fWeightIn := GVL_Factory.fScaleWeight, bReleasePartTransfer := fbDistributorForward.bReadyToReceivePart);
+fbDistributorForward(stMachineControl := stMachineControl, bPartAtExit := NOT GVL_Factory.bLbConveyorForwardExitNC, bPartAtEntry := GVL_Factory.bLbConveyorForwardEntry);
 
-IF bVal2 THEN
+IF bVal THEN
     fbFeeder.Enable();
 END_IF
 
-
+IF bReset THEN
+    bReset := FALSE;
+    fbFeeder.Reset();
+    fbScale.Reset();
+    fbDistributorForward.Reset();
+END_IF
 
 GVL_Factory.bEmitter := fbFeeder.bEmitter;
 GVL_Factory.bConveyorFeed := fbFeeder.bConveyorOn;
 GVL_Factory.bConveyorScale := fbScale.bConveyorOn;
+GVL_Factory.bConveyorForward := fbDistributorForward.bConveyorOn;
 ]]></ST>
     </Implementation>
   </POU>

@@ -49,13 +49,13 @@
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bFactoryReset" VarB="PlcTask Inputs^GVL_Factory.bFactoryReset" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bFactoryRunning" VarB="PlcTask Inputs^GVL_Factory.bFactoryRunning" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorForwardEntry" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorForwardEntry" AutoLink="true" PeerAutoLink="true" Size="1"/>
-				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorForwardExit" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorForwardExit" AutoLink="true" PeerAutoLink="true" Size="1"/>
+				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorForwardExit" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorForwardExitNC" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorLeftEntry" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorLeftEntry" AutoLink="true" PeerAutoLink="true" Size="1"/>
-				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorLeftExit" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorLeftExit" AutoLink="true" PeerAutoLink="true" Size="1"/>
+				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorLeftExit" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorLeftExitNC" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorRightEntry" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorRightEntry" AutoLink="true" PeerAutoLink="true" Size="1"/>
-				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorRightExit" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorRightExit" AutoLink="true" PeerAutoLink="true" Size="1"/>
+				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorRightExit" VarB="PlcTask Inputs^GVL_Factory.bLbConveyorRightExitNC" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbScale" VarB="PlcTask Inputs^GVL_Factory.bLbScale" AutoLink="true" PeerAutoLink="true" Size="1"/>
-				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbScaleEntry" VarB="PlcTask Inputs^GVL_Factory.bLbScaleEntry" AutoLink="true" PeerAutoLink="true" Size="1"/>
+				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbScaleEntry" VarB="PlcTask Inputs^GVL_Factory.bLbScaleEntryNC" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bLbScaleExit" VarB="PlcTask Inputs^GVL_Factory.bLbScaleExit" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bSwAuto" VarB="PlcTask Inputs^GVL_Factory.bSwAuto" AutoLink="true" PeerAutoLink="true" Size="1"/>
 				<Link VarA="PlcTask Outputs^FactoryioConnector.stInputs^bSwConveyorFeedOn" VarB="PlcTask Inputs^GVL_Factory.bSwConveyorFeedOn" AutoLink="true" PeerAutoLink="true" Size="1"/>

@@ -23,7 +23,7 @@ VAR_GLOBAL
     bSwEmergStopNC AT %I*: BOOL;
     // B10 LB: At scale entry
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbScaleEntry'}
-    bLbScaleEntry AT %I*: BOOL;
+    bLbScaleEntryNC AT %I*: BOOL;
     // B11 LB: At scale
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbScale'}
     bLbScale AT %I*: BOOL;
@@ -35,19 +35,19 @@ VAR_GLOBAL
     bLbConveyorLeftEntry AT %I*: BOOL;
     // B21 LB: At exit left
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorLeftExit'}
-    bLbConveyorLeftExit AT %I*: BOOL;
+    bLbConveyorLeftExitNC AT %I*: BOOL;
     // B30 LB: At forward entry
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorForwardEntry'}
     bLbConveyorForwardEntry AT %I*: BOOL;
     // B31 LB: At exit front
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorForwardExit'}
-    bLbConveyorForwardExit AT %I*: BOOL;
+    bLbConveyorForwardExitNC AT %I*: BOOL;
     // B40 LB: At right entry
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorRightEntry'}
     bLbConveyorRightEntry AT %I*: BOOL;
     // B41 LB: At exit right
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbConveyorRightExit'}
-    bLbConveyorRightExit AT %I*: BOOL;
+    bLbConveyorRightExitNC AT %I*: BOOL;
     // S100 Band Einlauf ein
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bSwConveyorFeedOn'}
     bSwConveyorFeedOn AT %I*: BOOL;
