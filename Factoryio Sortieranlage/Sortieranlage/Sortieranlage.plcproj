@@ -31,7 +31,7 @@
     <Compile Include="POUs\FB_Conveyor.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\FB_Distributor.TcPOU">
+    <Compile Include="POUs\FB_Remover.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\FB_Feeder.TcPOU">

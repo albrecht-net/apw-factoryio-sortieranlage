@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="FB_Distributor" Id="{0bc5e74d-e01a-4eac-8057-39627e6c4303}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Distributor EXTENDS FB_Conveyor
+  <POU Name="FB_Remover" Id="{0bc5e74d-e01a-4eac-8057-39627e6c4303}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Remover EXTENDS FB_Conveyor
 VAR_INPUT
     // Part is at conveyor entry
     bPartAtEntry: BOOL;
@@ -19,7 +19,7 @@ VAR
     fbPartAtEntry: R_TRIG();
     nPartsOnConveyor: INT;
     // Current state of distributor
-    eStateDistributor: (D_IDLE, D_MOVE_PART, D_TRANSFER_TO_FOLLOWER, D_EMPTY_CONVEYOR, D_LOCKOUT);
+    eStateRemover: (R_IDLE, R_MOVE_PART, R_TRANSFER_TO_FOLLOWER, R_EMPTY_CONVEYOR, R_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -31,15 +31,15 @@ IF fbPartAtEntry.Q THEN
     nPartsOnConveyor := nPartsOnConveyor + 1;
 END_IF
 
-CASE eStateDistributor OF
-    D_IDLE:
+CASE eStateRemover OF
+    R_IDLE:
         SUPER^.Stop(bRunOut := TRUE);
         bReadyToReceivePart := TRUE;
         IF nPartsOnConveyor > 0 THEN
-            eStateDistributor := D_MOVE_PART;
+            eStateRemover := R_MOVE_PART;
         END_IF
 
-    D_MOVE_PART:
+    R_MOVE_PART:
         SUPER^.Start();
         fbMovingTimeout.IN := TRUE;
         IF PartAtExit() THEN
@@ -48,27 +48,27 @@ CASE eStateDistributor OF
             // Throw error message: Part moving timeout
             fbMovingTimeout.IN := FALSE;
             nPartsOnConveyor := 0;
-            eStateDistributor := D_IDLE;
+            eStateRemover := R_IDLE;
         END_IF
 
-    D_TRANSFER_TO_FOLLOWER:
+    R_TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
         fbMovingTimeout.IN := TRUE;
         IF NOT bPartAtExit THEN
             fbMovingTimeout.IN := FALSE;
             nPartsOnConveyor := nPartsOnConveyor - 1;
             IF nPartsOnConveyor > 0 THEN
-                eStateDistributor := D_MOVE_PART;
+                eStateRemover := R_MOVE_PART;
             ELSE
                 nPartsOnConveyor := 0;
-                eStateDistributor := D_IDLE;
+                eStateRemover := R_IDLE;
             END_IF
         END_IF
         IF fbMovingTimeout.Q THEN
             // Throw error message: Part transfer moving timeout
             fbMovingTimeout.IN := FALSE;
             nPartsOnConveyor := 0;
-            eStateDistributor := D_IDLE;
+            eStateRemover := R_IDLE;
         END_IF
 END_CASE
 ]]></ST>
@@ -81,7 +81,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF bPartAtExit THEN
-    eStateDistributor := D_TRANSFER_TO_FOLLOWER;
+    eStateRemover := R_TRANSFER_TO_FOLLOWER;
 ELSE
     PartAtExit := FALSE;
     RETURN;
