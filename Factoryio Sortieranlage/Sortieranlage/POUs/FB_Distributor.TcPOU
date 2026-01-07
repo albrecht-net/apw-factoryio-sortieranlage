@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Distributor" Id="{0bc5e74d-e01a-4eac-8057-39627e6c4303}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Distributor EXTENDS FB_Conveyor
+VAR_INPUT
+    // Part is at conveyor entry
+    bPartAtEntry: BOOL;
+    // Part is at conveyor exit
+    bPartAtExit: BOOL;
+END_VAR
+VAR_OUTPUT
+    // Module is ready to receive part
+    bReadyToReceivePart: BOOL;
+    bPartProcessed: BOOL;
+END_VAR
+VAR
+    // Part moving timeout
+    fbMovingTimeout: TON;
+    fbPartAtEntry: R_TRIG();
+    nPartsOnConveyor: INT;
+    // Current state of distributor
+    eStateDistributor: (D_IDLE, D_MOVE_PART, D_TRANSFER_TO_FOLLOWER, D_EMPTY_CONVEYOR, D_LOCKOUT);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^();
+fbMovingTimeout();
+fbPartAtEntry(CLK := bPartAtEntry);
+
+IF fbPartAtEntry.Q THEN
+    nPartsOnConveyor := nPartsOnConveyor + 1;
+END_IF
+
+CASE eStateDistributor OF
+    D_IDLE:
+        SUPER^.Stop(bRunOut := TRUE);
+        bReadyToReceivePart := TRUE;
+        IF nPartsOnConveyor > 0 THEN
+            eStateDistributor := D_MOVE_PART;
+        END_IF
+
+    D_MOVE_PART:
+        SUPER^.Start();
+        fbMovingTimeout.IN := TRUE;
+        IF PartAtExit() THEN
+            fbMovingTimeout.IN := FALSE;
+        ELSIF fbMovingTimeout.Q THEN
+            // Throw error message: Part moving timeout
+            fbMovingTimeout.IN := FALSE;
+            nPartsOnConveyor := 0;
+            eStateDistributor := D_IDLE;
+        END_IF
+
+    D_TRANSFER_TO_FOLLOWER:
+        SUPER^.Start();
+        fbMovingTimeout.IN := TRUE;
+        IF NOT bPartAtExit THEN
+            fbMovingTimeout.IN := FALSE;
+            nPartsOnConveyor := nPartsOnConveyor - 1;
+            IF nPartsOnConveyor > 0 THEN
+                eStateDistributor := D_MOVE_PART;
+            ELSE
+                nPartsOnConveyor := 0;
+                eStateDistributor := D_IDLE;
+            END_IF
+        END_IF
+        IF fbMovingTimeout.Q THEN
+            // Throw error message: Part transfer moving timeout
+            fbMovingTimeout.IN := FALSE;
+            nPartsOnConveyor := 0;
+            eStateDistributor := D_IDLE;
+        END_IF
+END_CASE
+]]></ST>
+    </Implementation>
+    <Method Name="PartAtExit" Id="{819b3435-f3e7-4c82-a928-abcde45f2cf7}">
+      <Declaration><![CDATA[// Return TRUE if part reach conveyor exit and state machine will go to next step
+METHOD PRIVATE PartAtExit: BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bPartAtExit THEN
+    eStateDistributor := D_TRANSFER_TO_FOLLOWER;
+ELSE
+    PartAtExit := FALSE;
+    RETURN;
+END_IF
+
+PartAtExit := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="tMovingTimeout" Id="{2efb2728-9f0d-43d3-862b-fd68db65250b}">
+      <Declaration><![CDATA[// Maximum duration for part to reach exit of conveyor
+{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC tMovingTimeout : TIME
+]]></Declaration>
+      <Get Name="Get" Id="{36db0884-f442-4f2e-9856-af33307f7eb1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[tMovingTimeout := fbMovingTimeout.PT;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1a320144-ae0f-4a01-baec-2e883f795487}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbMovingTimeout.PT := tMovingTimeout;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>
