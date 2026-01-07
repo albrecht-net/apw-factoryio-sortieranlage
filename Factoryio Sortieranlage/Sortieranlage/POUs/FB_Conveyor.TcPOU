@@ -1,21 +1,149 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Conveyor" Id="{245a5808-fce9-4686-b31f-3aa50bc94906}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Conveyor
+    <Declaration><![CDATA[FUNCTION_BLOCK ABSTRACT FB_Conveyor
 VAR_INPUT
-    bEnable: BOOL;
-    bPartAtExit: BOOL;
+    // Machine control
+    stMachineControl: ST_MachineControl;
 END_VAR
 VAR_OUTPUT
+    // Output to conveyor motor
     bConveyorOn: BOOL;
-    bLifesign: BYTE;
 END_VAR
 VAR
+    // Run-down-timeout after normal stop
+    fbRunDown: TON;
+    // Current state of conveyor
+    eStateConveyor: (C_READY, C_RUNNING, C_RUNNING_OUT, C_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[bLifesign := bLifesign + 1;
+      <ST><![CDATA[// Cyclic call of timer for run-down-timeout after normal stop
+fbRunDown();
+
+// Emergency stop is active
+IF NOT stMachineControl.bEmergStopNC THEN
+    eStateConveyor := C_LOCKOUT;
+END_IF
+
+
+CASE eStateConveyor OF
+    C_READY:
+        bConveyorOn := FALSE;
+        fbRunDown.IN := FALSE;
+
+    C_RUNNING:
+        bConveyorOn := TRUE;
+        fbRunDown.IN := TRUE;
+
+    C_RUNNING_OUT:
+        fbRunDown.IN := FALSE;
+        IF NOT fbRunDown.Q THEN
+            eStateConveyor := C_READY;
+        END_IF
+
+    C_LOCKOUT:
+        bConveyorOn := FALSE;
+        fbRunDown.IN := FALSE;
+END_CASE
 ]]></ST>
     </Implementation>
+    <Method Name="Enable" Id="{6a287193-12c8-43cf-97d7-1f16180b1374}">
+      <Declaration><![CDATA[METHOD PROTECTED Enable
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Cyclic call of timer for run-down-timeout after normal stop
+fbRunDown();
+
+// Emergency stop is active
+IF NOT stMachineControl.bEmergStopNC THEN
+    eStateConveyor := C_LOCKOUT;
+END_IF
+
+
+CASE eStateConveyor OF
+    C_READY:
+        bConveyorOn := FALSE;
+        fbRunDown.IN := FALSE;
+
+    C_RUNNING:
+        bConveyorOn := TRUE;
+        fbRunDown.IN := TRUE;
+
+    C_RUNNING_OUT:
+        fbRunDown.IN := FALSE;
+        IF NOT fbRunDown.Q THEN
+            eStateConveyor := C_READY;
+        END_IF
+
+    C_LOCKOUT:
+        bConveyorOn := FALSE;
+        fbRunDown.IN := FALSE;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{c6f9219d-30dc-4aaa-a52b-80bf5ad63bc8}">
+      <Declaration><![CDATA[METHOD PROTECTED Reset
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stMachineControl.bEmergStopNC AND eStateConveyor = C_LOCKOUT THEN
+    eStateConveyor := C_READY;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Start" Id="{e5324438-ffcb-4c49-a5d6-8babf4557efa}">
+      <Declaration><![CDATA[METHOD PROTECTED Start
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eStateConveyor = C_READY OR eStateConveyor = C_RUNNING_OUT THEN
+    eStateConveyor := C_RUNNING;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{497f56fe-7509-4e86-b27b-bdcc17baac39}">
+      <Declaration><![CDATA[METHOD PROTECTED Stop
+VAR_INPUT
+    // Enable timeout before conveyor halt
+    bRunOut: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eStateConveyor = C_RUNNING THEN
+    // Stop converyor with timeout before halt
+    IF fbRunDown.PT > T#0S AND bRunOut THEN
+        eStateConveyor := C_RUNNING_OUT;
+
+    // Stop conveyor immediately
+    ELSE
+        eStateConveyor := C_READY;
+    END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="tStoppingTimeout" Id="{4b764709-8d3d-4944-95b7-04a2d130102e}">
+      <Declaration><![CDATA[// Run-down-timeout after normal stop
+{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC tStoppingTimeout: TIME
+]]></Declaration>
+      <Set Name="Set" Id="{5476210a-bee1-4eef-b655-9d8c659c6410}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRunDown.PT := tStoppingTimeout;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
   </POU>
 </TcPlcObject>
