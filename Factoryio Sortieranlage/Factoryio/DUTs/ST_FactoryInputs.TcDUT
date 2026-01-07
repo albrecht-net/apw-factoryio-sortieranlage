@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_FactoryInputs" Id="{61590395-c80a-46cd-a514-3854f1e0896e}">
+    <Declaration><![CDATA[TYPE ST_FactoryInputs :
+STRUCT
+    // S0 Reset
+    bBtnReset: BIT;
+    // S1 Start
+    bBtnStart: BIT;
+    // S2 Stop NC
+    bBtnStopNC: BIT;
+    // S3 Manual
+    bSwManual: BIT;
+    // S4 Auto
+    bSwAuto: BIT;
+    // S5 Emergency stop
+    bSwEmergStopNC: BIT;
+    // B10 LB: At scale entry
+    bLbScaleEntry: BIT;
+    // B11 LB: At scale
+    bLbScale: BIT;
+    // B12 LB: At scale exit
+    bLbScaleExit: BIT;
+    // B20 LB: At left entry
+    bLbConveyorLeftEntry: BIT;
+    // B21 LB: At exit left
+    bLbConveyorLeftExit: BIT;
+    // B30 LB: At forward entry
+    bLbConveyorForwardEntry: BIT;
+    // B31 LB: At exit front
+    bLbConveyorForwardExit: BIT;
+    // B40 LB: At right entry
+    bLbConveyorRightEntry: BIT;
+    // B41 LB: At exit right
+    bLbConveyorRightExit: BIT;
+    // S100 Band Einlauf ein
+    bSwConveyorFeedOn: BIT;
+    // S101 Band Auslauf ein
+    bSwConveyorForwardOn: BIT;
+    // S102 Band Auslauf Links ein
+    bSwConveyorLeftOn: BIT;
+    // S103 Band Auslauf Rechts ein
+    bSwConveyorRightOn: BIT;
+    // S104 Band Waage ein
+    bSwConveyorScaleOn: BIT;
+    // FACTORY I/O (Running)
+    bFactoryRunning: BIT;
+    // FACTORY I/O (Paused)
+    bFactoryPaused: BIT;
+    // FACTORY I/O (Reset)
+    bFactoryReset: BIT;
+    // Gewicht
+    fScaleWeight: REAL;
+    // FACTORY I/O (Time Scale)
+    fFactoryTimeScale: REAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

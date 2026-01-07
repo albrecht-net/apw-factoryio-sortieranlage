@@ -30,99 +30,10 @@ VAR
     // Factoryio analog output mapping
     stFactoryioAnalogOutputs: ST_ModbusMapHoldingRegs;
 
-    // S0 Reset
-    bBtnReset AT %Q*: BOOL;
-    // S1 Start
-    bBtnStart AT %Q*: BOOL;
-    // S2 Stop NC
-    bBtnStopNC AT %Q*: BOOL;
-    // S3 Manual
-    bSwManual AT %Q*: BOOL;
-    // S4 Auto
-    bSwAuto AT %Q*: BOOL;
-    // S5 Emergency stop
-    bSwEmergStopNC AT %Q*: BOOL;
-    // B10 LB: At scale entry
-    bLbScaleEntry AT %Q*: BOOL;
-    // B11 LB: At scale
-    bLbScale AT %Q*: BOOL;
-    // B12 LB: At scale exit
-    bLbScaleExit AT %Q*: BOOL;
-    // B20 LB: At left entry
-    bLbConveyorLeftEntry AT %Q*: BOOL;
-    // B21 LB: At exit left
-    bLbConveyorLeftExit AT %Q*: BOOL;
-    // B30 LB: At forward entry
-    bLbConveyorForwardEntry AT %Q*: BOOL;
-    // B31 LB: At exit front
-    bLbConveyorForwardExit AT %Q*: BOOL;
-    // B40 LB: At right entry
-    bLbConveyorRightEntry AT %Q*: BOOL;
-    // B41 LB: At exit right
-    bLbConveyorRightExit AT %Q*: BOOL;
-    // S100 Band Einlauf ein
-    bSwConveyorFeedOn AT %Q*: BOOL;
-    // S101 Band Auslauf ein
-    bSwConveyorForwardOn AT %Q*: BOOL;
-    // S102 Band Auslauf Links ein
-    bSwConveyorLeftOn AT %Q*: BOOL;
-    // S103 Band Auslauf Rechts ein
-    bSwConveyorRightOn AT %Q*: BOOL;
-    // S104 Band Waage ein
-    bSwConveyorScaleOn AT %Q*: BOOL;
-    // FACTORY I/O (Running)
-    bFactoryRunning AT %Q*: BOOL;
-    // FACTORY I/O (Paused)
-    bFactoryPaused AT %Q*: BOOL;
-    // FACTORY I/O (Reset)
-    bFactoryReset AT %Q*: BOOL;
-    // Gewicht
-    fScaleWeight AT %Q*: REAL;
-    // FACTORY I/O (Time Scale)
-    fFactoryTimeScale AT %Q*: REAL;
-
-    // H0 Reset light
-    bBtnResetLight AT %I*: BOOL;
-    // H1 Start light
-    bBtnStartLight AT %I*: BOOL;
-    // H2 Stop light
-    bBtnStopLight AT %I*: BOOL;
-    // B0 Alarm Siren
-    bAlarmSiren AT %I*: BOOL;
-    // H20 Signal Light Red
-    bStackLightRed AT %I*: BOOL;
-    // H21 Signal Light Green
-    bStackLightGreen AT %I*: BOOL;
-    // H22 Signal Light Yellow
-    bStackLightYellow AT %I*: BOOL;
-    // M10 Entry conveyor
-    bConveyorFeed AT %I*: BOOL;
-    // M12 Load scale
-    bConveyorScale AT %I*: BOOL;
-    // M20 Left conveyor
-    bConveyorLeft AT %I*: BOOL;
-    // M30 Front conveyor
-    bConveyorForward AT %I*: BOOL;
-    // M40 Right conveyor
-    bConveyorRight AT %I*: BOOL;
-    // M50 Send left
-    bSorterLeft AT %I*: BOOL;
-    // M51 Send forward
-    bSorterRaise AT %I*: BOOL;
-    // M52 Send right
-    bSorterRight AT %I*: BOOL;
-    // Emitter
-    bEmitter AT %I*: BOOL;
-    // Gewicht
-    nDispWeight AT %I*: INT;
-    // Left count
-    nDispCountLeft AT %I*: INT;
-    // Forward count
-    nDispCountForward AT %I*: INT;
-    // Right count
-    nDispCountRight AT %I*: INT;
-    // FACTORY I/O (Camera Position)
-    nFactoryCameraPosition AT %I*: INT;
+    // Factory Inputs
+    stInputs AT %Q*: ST_FactoryInputs;
+    // Factory Outputs
+    stOutputs AT %I*: ST_FactoryOutputs;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -140,29 +51,29 @@ fbReadInputs(
 
 IF NOT fbReadInputs.bBusy THEN
     // Assign digital sensors to inputs
-    bBtnReset := stFactoryioDigitalInputs.bBtnReset;
-    bBtnStart := stFactoryioDigitalInputs.bBtnStart;
-    bBtnStopNC := stFactoryioDigitalInputs.bBtnStopNC;
-    bSwManual := stFactoryioDigitalInputs.bSwManual;
-    bSwAuto := stFactoryioDigitalInputs.bSwAuto;
-    bSwEmergStopNC := stFactoryioDigitalInputs.bSwEmergStopNC;
-    bLbScaleEntry := stFactoryioDigitalInputs.bLbScaleEntry;
-    bLbScale := stFactoryioDigitalInputs.bLbScale;
-    bLbScaleExit := stFactoryioDigitalInputs.bLbScaleExit;
-    bLbConveyorLeftEntry := stFactoryioDigitalInputs.bLbConveyorLeftEntry;
-    bLbConveyorLeftExit := stFactoryioDigitalInputs.bLbConveyorLeftExit;
-    bLbConveyorForwardEntry := stFactoryioDigitalInputs.bLbConveyorForwardEntry;
-    bLbConveyorForwardExit := stFactoryioDigitalInputs.bLbConveyorForwardExit;
-    bLbConveyorRightEntry := stFactoryioDigitalInputs.bLbConveyorRightEntry;
-    bLbConveyorRightExit := stFactoryioDigitalInputs.bLbConveyorRightExit;
-    bSwConveyorFeedOn := stFactoryioDigitalInputs.bSwConveyorFeedOn;
-    bSwConveyorForwardOn := stFactoryioDigitalInputs.bSwConveyorForwardOn;
-    bSwConveyorLeftOn := stFactoryioDigitalInputs.bSwConveyorLeftOn;
-    bSwConveyorRightOn := stFactoryioDigitalInputs.bSwConveyorRightOn;
-    bSwConveyorScaleOn := stFactoryioDigitalInputs.bSwConveyorScaleOn;
-    bFactoryRunning := stFactoryioDigitalInputs.bFactoryRunning;
-    bFactoryPaused := stFactoryioDigitalInputs.bFactoryPaused;
-    bFactoryReset := stFactoryioDigitalInputs.bFactoryReset;
+    stInputs.bBtnReset := stFactoryioDigitalInputs.bBtnReset;
+    stInputs.bBtnStart := stFactoryioDigitalInputs.bBtnStart;
+    stInputs.bBtnStopNC := stFactoryioDigitalInputs.bBtnStopNC;
+    stInputs.bSwManual := stFactoryioDigitalInputs.bSwManual;
+    stInputs.bSwAuto := stFactoryioDigitalInputs.bSwAuto;
+    stInputs.bSwEmergStopNC := stFactoryioDigitalInputs.bSwEmergStopNC;
+    stInputs.bLbScaleEntry := stFactoryioDigitalInputs.bLbScaleEntry;
+    stInputs.bLbScale := stFactoryioDigitalInputs.bLbScale;
+    stInputs.bLbScaleExit := stFactoryioDigitalInputs.bLbScaleExit;
+    stInputs.bLbConveyorLeftEntry := stFactoryioDigitalInputs.bLbConveyorLeftEntry;
+    stInputs.bLbConveyorLeftExit := stFactoryioDigitalInputs.bLbConveyorLeftExit;
+    stInputs.bLbConveyorForwardEntry := stFactoryioDigitalInputs.bLbConveyorForwardEntry;
+    stInputs.bLbConveyorForwardExit := stFactoryioDigitalInputs.bLbConveyorForwardExit;
+    stInputs.bLbConveyorRightEntry := stFactoryioDigitalInputs.bLbConveyorRightEntry;
+    stInputs.bLbConveyorRightExit := stFactoryioDigitalInputs.bLbConveyorRightExit;
+    stInputs.bSwConveyorFeedOn := stFactoryioDigitalInputs.bSwConveyorFeedOn;
+    stInputs.bSwConveyorForwardOn := stFactoryioDigitalInputs.bSwConveyorForwardOn;
+    stInputs.bSwConveyorLeftOn := stFactoryioDigitalInputs.bSwConveyorLeftOn;
+    stInputs.bSwConveyorRightOn := stFactoryioDigitalInputs.bSwConveyorRightOn;
+    stInputs.bSwConveyorScaleOn := stFactoryioDigitalInputs.bSwConveyorScaleOn;
+    stInputs.bFactoryRunning := stFactoryioDigitalInputs.bFactoryRunning;
+    stInputs.bFactoryPaused := stFactoryioDigitalInputs.bFactoryPaused;
+    stInputs.bFactoryReset := stFactoryioDigitalInputs.bFactoryReset;
 
     // Execute modbus function
     fbReadInputs.bExecute := TRUE;
@@ -184,8 +95,8 @@ fbReadInputRegs(
 
 IF NOT fbReadInputs.bBusy THEN
     // Assign analog sensors to inputs
-    fScaleWeight := WORD_TO_REAL(stFactoryioAnalogInputs.fScaleWeight) / 100;
-    fFactoryTimeScale := WORD_TO_REAL(stFactoryioAnalogInputs.fFactoryTimeScale) / 100;
+    stInputs.fScaleWeight := WORD_TO_REAL(stFactoryioAnalogInputs.fScaleWeight) / 100;
+    stInputs.fFactoryTimeScale := WORD_TO_REAL(stFactoryioAnalogInputs.fFactoryTimeScale) / 100;
 
     // Execute modbus function
     fbReadInputRegs.bExecute := TRUE;
@@ -207,22 +118,22 @@ fbWriteCoils(
 
 IF NOT fbReadInputs.bBusy THEN
     // Assign outputs to digital actuators
-    stFactoryioDigitalOutputs.bBtnResetLight := bBtnResetLight;
-    stFactoryioDigitalOutputs.bBtnStartLight := bBtnStartLight;
-    stFactoryioDigitalOutputs.bBtnStopLight := bBtnStopLight;
-    stFactoryioDigitalOutputs.bAlarmSiren := bAlarmSiren;
-    stFactoryioDigitalOutputs.bStackLightRed := bStackLightRed;
-    stFactoryioDigitalOutputs.bStackLightGreen := bStackLightGreen;
-    stFactoryioDigitalOutputs.bStackLightYellow := bStackLightYellow;
-    stFactoryioDigitalOutputs.bConveyorFeed := bConveyorFeed;
-    stFactoryioDigitalOutputs.bConveyorScale := bConveyorScale;
-    stFactoryioDigitalOutputs.bConveyorLeft := bConveyorLeft;
-    stFactoryioDigitalOutputs.bConveyorForward := bConveyorForward;
-    stFactoryioDigitalOutputs.bConveyorRight := bConveyorRight;
-    stFactoryioDigitalOutputs.bSorterLeft := bSorterLeft;
-    stFactoryioDigitalOutputs.bSorterRaise := bSorterRaise;
-    stFactoryioDigitalOutputs.bSorterRight := bSorterRight;
-    stFactoryioDigitalOutputs.bEmitter := bEmitter;
+    stFactoryioDigitalOutputs.bBtnResetLight := stOutputs.bBtnResetLight;
+    stFactoryioDigitalOutputs.bBtnStartLight := stOutputs.bBtnStartLight;
+    stFactoryioDigitalOutputs.bBtnStopLight := stOutputs.bBtnStopLight;
+    stFactoryioDigitalOutputs.bAlarmSiren := stOutputs.bAlarmSiren;
+    stFactoryioDigitalOutputs.bStackLightRed := stOutputs.bStackLightRed;
+    stFactoryioDigitalOutputs.bStackLightGreen := stOutputs.bStackLightGreen;
+    stFactoryioDigitalOutputs.bStackLightYellow := stOutputs.bStackLightYellow;
+    stFactoryioDigitalOutputs.bConveyorFeed := stOutputs.bConveyorFeed;
+    stFactoryioDigitalOutputs.bConveyorScale := stOutputs.bConveyorScale;
+    stFactoryioDigitalOutputs.bConveyorLeft := stOutputs.bConveyorLeft;
+    stFactoryioDigitalOutputs.bConveyorForward := stOutputs.bConveyorForward;
+    stFactoryioDigitalOutputs.bConveyorRight := stOutputs.bConveyorRight;
+    stFactoryioDigitalOutputs.bSorterLeft := stOutputs.bSorterLeft;
+    stFactoryioDigitalOutputs.bSorterRaise := stOutputs.bSorterRaise;
+    stFactoryioDigitalOutputs.bSorterRight := stOutputs.bSorterRight;
+    stFactoryioDigitalOutputs.bEmitter := stOutputs.bEmitter;
 
     // Execute modbus function
     fbWriteCoils.bExecute := TRUE;
@@ -244,11 +155,11 @@ fbWriteRegs(
 
 IF NOT fbReadInputs.bBusy THEN
     // Assign outputs to analog actuators
-    stFactoryioAnalogOutputs.nDispWeight := INT_TO_WORD(nDispWeight);
-    stFactoryioAnalogOutputs.nDispCountLeft := INT_TO_WORD(nDispCountLeft);
-    stFactoryioAnalogOutputs.nDispCountForward := INT_TO_WORD(nDispCountForward);
-    stFactoryioAnalogOutputs.nDispCountRight := INT_TO_WORD(nDispCountRight);
-    stFactoryioAnalogOutputs.nFactoryCameraPosition := INT_TO_WORD(nFactoryCameraPosition);
+    stFactoryioAnalogOutputs.nDispWeight := INT_TO_WORD(stOutputs.nDispWeight);
+    stFactoryioAnalogOutputs.nDispCountLeft := INT_TO_WORD(stOutputs.nDispCountLeft);
+    stFactoryioAnalogOutputs.nDispCountForward := INT_TO_WORD(stOutputs.nDispCountForward);
+    stFactoryioAnalogOutputs.nDispCountRight := INT_TO_WORD(stOutputs.nDispCountRight);
+    stFactoryioAnalogOutputs.nFactoryCameraPosition := INT_TO_WORD(stOutputs.nFactoryCameraPosition);
 
     // Execute modbus function
     fbWriteRegs.bExecute := TRUE;

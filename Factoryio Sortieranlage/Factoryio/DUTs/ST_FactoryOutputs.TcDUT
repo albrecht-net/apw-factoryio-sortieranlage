@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_FactoryOutputs" Id="{600569ba-a818-4505-a228-1fb1f5845e74}">
+    <Declaration><![CDATA[TYPE ST_FactoryOutputs :
+STRUCT
+    // H0 Reset light
+    bBtnResetLight: BIT;
+    // H1 Start light
+    bBtnStartLight: BIT;
+    // H2 Stop light
+    bBtnStopLight: BIT;
+    // B0 Alarm Siren
+    bAlarmSiren: BIT;
+    // H20 Signal Light Red
+    bStackLightRed: BIT;
+    // H21 Signal Light Green
+    bStackLightGreen: BIT;
+    // H22 Signal Light Yellow
+    bStackLightYellow: BIT;
+    // M10 Entry conveyor
+    bConveyorFeed: BIT;
+    // M12 Load scale
+    bConveyorScale: BIT;
+    // M20 Left conveyor
+    bConveyorLeft: BIT;
+    // M30 Front conveyor
+    bConveyorForward: BIT;
+    // M40 Right conveyor
+    bConveyorRight: BIT;
+    // M50 Send left
+    bSorterLeft: BIT;
+    // M51 Send forward
+    bSorterRaise: BIT;
+    // M52 Send right
+    bSorterRight: BIT;
+    // Emitter
+    bEmitter: BIT;
+    // Gewicht
+    nDispWeight: INT;
+    // Left count
+    nDispCountLeft: INT;
+    // Forward count
+    nDispCountForward: INT;
+    // Right count
+    nDispCountRight: INT;
+    // FACTORY I/O (Camera Position)
+    nFactoryCameraPosition: INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
