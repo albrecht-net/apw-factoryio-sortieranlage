@@ -3,9 +3,24 @@
   <GVL Name="GVL_Factory" Id="{f94dbe4e-dbbf-4a59-bf49-b0516712c0ef}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
-    // Machine control
-    {attribute 'TcLinkToOSO' := '<0,6,0>TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bBtnReset'}
-    stMachineControl AT %I*: ST_MachineControl;
+    // S0 Reset
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bBtnReset'}
+    bBtnReset AT %I*: BOOL;
+    // S1 Start
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bBtnStart'}
+    bBtnStart AT %I*: BOOL;
+    // S2 Stop NC
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bBtnStopNC'}
+    bBtnStopNC AT %I*: BOOL;
+    // S3 Manual
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bSwManual'}
+    bSwManual AT %I*: BOOL;
+    // S4 Auto
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bSwAuto'}
+    bSwAuto AT %I*: BOOL;
+    // S5 Emergency stop
+    {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bSwEmergStopNC'}
+    bSwEmergStopNC AT %I*: BOOL;
     // B10 LB: At scale entry
     {attribute 'TcLinkTo' := 'TIPC^Factoryio^Factoryio Instance^PlcTask Outputs^FactoryioConnector.stInputs^bLbScaleEntry'}
     bLbScaleEntry AT %I*: BOOL;
