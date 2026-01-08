@@ -3,13 +3,15 @@
   <POU Name="MAIN" Id="{057ae4a3-2787-4424-9a6b-bc231d52e4b1}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-    bInit: BOOL;
-    bEnable: BOOL;
-	bReset: BOOL;
+    // Control commands and states
     stMachineControl: ST_MachineControl;
-    
+
+    // Module instance feeder
     fbFeeder: FB_Feeder() := (tMovingTimeout := T#4S);
+    // Module instance scale
     fbScale: FB_Scale() := (tRunDownTimeout := T#3S, tMovingTimeout := T#4S, tWeightTimeout := T#2S);
+    // Module instance distributor
+    {warning disable C0564}
     fbDistributor: FB_Distributor(
         pForward := ADR(aRecipePartsForward),
         nForwardSize := XSIZEOF(aRecipePartsForward),
@@ -25,24 +27,52 @@ VAR
         tMovingTimeout := T#5S,
         tRunDownTimeout := T#3S
     );
+    {warning restore C0564}
+    // Module instance remover conveyor forward
     fbRemoverForward: FB_Remover() := (tRunDownTimeout := T#3S, tMovingTimeout := T#5S);
+    // Module instance remover conveyor left
     fbRemoverLeft: FB_Remover() := (tRunDownTimeout := T#3S, tMovingTimeout := T#5S);
+    // Module instance remover conveyor right
     fbRemoverRight: FB_Remover() := (tRunDownTimeout := T#3S, tMovingTimeout := T#5S);
 END_VAR
 VAR PERSISTENT
+    // Recipe for required part weight to select forward remover
     aRecipePartsForward: ARRAY[0..6] OF REAL := [1.5, 4.0, 5.0, 7.5];
+    // Recipe for required part weight to select left remover
     aRecipePartsLeft: ARRAY[0..6] OF REAL := [3.5];
+    // Recipe for required part weight to select right remover
     aRecipePartsRight: ARRAY[0..6] OF REAL := [2.5];
+
+    // Processed parts from forward remover in automatic mode
+    nPartCountForward: UINT;
+    // Processed parts from left remover in automatic mode
+    nPartCountLeft: UINT;
+    // Processed parts from right remover in automatic mode
+    nPartCountRight: UINT;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[stMachineControl.bReset := GVL_Factory.bBtnReset;
-stMachineControl.bStart := GVL_Factory.bBtnStart;
-stMachineControl.bStopNC := GVL_Factory.bBtnStopNC;
-stMachineControl.bManual := GVL_Factory.bSwManual;
-stMachineControl.bAuto := GVL_Factory.bSwAuto;
-stMachineControl.bEmergStopNC := GVL_Factory.bSwEmergStopNC;
+      <ST><![CDATA[MachineControl();
 
+IF stMachineControl.eMachineOpMode = E_MachineOpMode.AUTOMATIC THEN
+    Automatic();    
+END_IF
+
+MachineStatusDisplay(bForceUpdate := FALSE);
+]]></ST>
+    </Implementation>
+    <Method Name="Automatic" Id="{6c6989cb-1256-4b60-a30f-ea17a6adea58}">
+      <Declaration><![CDATA[METHOD Automatic
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Enable processing
+IF stMachineControl.eMachineCommand = E_MachineCommand.START THEN
+    fbFeeder.Enable();
+END_IF
+
+// Cyclic calls of function block instances
 fbFeeder(
     stMachineControl := stMachineControl,
     bPartAtExit := NOT GVL_Factory.bLbScaleEntryNC,
@@ -82,21 +112,23 @@ fbRemoverRight(
     bPartAtEntry := GVL_Factory.bLbConveyorRightEntry
 );
 
+// Call function for part distribution
 IF fbScale.bWeightIsUpdated THEN
     fbDistributor.AnnounceNextPart(fWeight := fbScale.fWeightOut);
 END_IF
 
-IF bEnable THEN
-    fbFeeder.Enable();
+// Increase part processing counter
+IF fbRemoverForward.bPartProcessed THEN
+    nPartCountForward := nPartCountForward + 1;
+END_IF
+IF fbRemoverLeft.bPartProcessed THEN
+    nPartCountLeft := nPartCountLeft + 1;
+END_IF
+IF fbRemoverRight.bPartProcessed THEN
+    nPartCountRight := nPartCountRight + 1;
 END_IF
 
-IF bReset THEN
-    bReset := FALSE;
-    fbFeeder.Reset();
-    fbScale.Reset();
-    fbRemoverForward.Reset();
-END_IF
-
+// Output to actuators
 GVL_Factory.bEmitter := fbFeeder.bEmitter;
 GVL_Factory.bConveyorFeed := fbFeeder.bConveyorOn;
 GVL_Factory.bConveyorScale := fbScale.bConveyorOn;
@@ -107,6 +139,102 @@ GVL_Factory.bConveyorForward := fbRemoverForward.bConveyorOn;
 GVL_Factory.bConveyorLeft := fbRemoverLeft.bConveyorOn;
 GVL_Factory.bConveyorRight := fbRemoverRight.bConveyorOn;
 ]]></ST>
-    </Implementation>
+      </Implementation>
+    </Method>
+    <Method Name="MachineControl" Id="{3bfd9d0c-460f-4966-97b8-633b969698da}">
+      <Declaration><![CDATA[METHOD MachineControl
+VAR_INPUT
+END_VAR
+VAR
+    // One conveyor is blocked
+    bOneConveyorLocked: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Factory operating mode
+IF GVL_Factory.bFactoryRunning AND GVL_Factory.bFactoryPaused THEN
+    stMachineControl.eFactoryOpMode := E_FactoryOpMode.PAUSED;
+ELSIF GVL_Factory.bFactoryRunning THEN
+    stMachineControl.eFactoryOpMode := E_FactoryOpMode.RUNNING;
+ELSE
+    stMachineControl.eFactoryOpMode := E_FactoryOpMode.HALTED;
+END_IF
+
+// Factory reset has highest priority
+IF GVL_Factory.bFactoryReset THEN
+    stMachineControl.eFactoryOpMode := E_FactoryOpMode.RESET;
+END_IF
+
+// Machine operating mode
+{info 'Currently forced to only automatic mode'}
+IF GVL_Factory.bSwAuto OR TRUE THEN
+    stMachineControl.eMachineOpMode := E_MachineOpMode.AUTOMATIC;
+ELSIF GVL_Factory.bSwManual THEN
+    stMachineControl.eMachineOpMode := E_MachineOpMode.MANUAL;
+END_IF
+
+// One conveyor is blocked
+bOneConveyorLocked := fbFeeder.eConveyorState = E_ConveyorState.LOCKOUT OR
+    fbScale.eConveyorState = E_ConveyorState.LOCKOUT OR
+    fbDistributor.eConveyorState = E_ConveyorState.LOCKOUT OR
+    fbRemoverForward.eConveyorState = E_ConveyorState.LOCKOUT OR
+    fbRemoverLeft.eConveyorState = E_ConveyorState.LOCKOUT OR
+    fbRemoverRight.eConveyorState = E_ConveyorState.LOCKOUT;
+
+IF bOneConveyorLocked THEN
+    GVL_Factory.bStackLightRed := TRUE;
+
+    IF GVL_Factory.bBtnReset THEN
+        fbFeeder.Reset();
+        fbScale.Reset();
+        fbDistributor.Reset();
+        fbRemoverForward.Reset();
+        fbRemoverLeft.Reset();
+        fbRemoverRight.Reset();
+    END_IF
+ELSE
+    GVL_Factory.bStackLightRed := FALSE;
+END_IF
+
+// Store last stop/start command
+IF NOT GVL_Factory.bBtnStopNC THEN
+    stMachineControl.eMachineCommand := E_MachineCommand.STOP;
+ELSIF GVL_Factory.bBtnStart THEN
+    stMachineControl.eMachineCommand := E_MachineCommand.START;
+END_IF
+
+// Hardware buttons to machine control struct
+stMachineControl.bStop := NOT GVL_Factory.bBtnStopNC;
+stMachineControl.bStart := GVL_Factory.bBtnStart;
+stMachineControl.bReset := GVL_Factory.bBtnReset;
+stMachineControl.bEmergStopNC := GVL_Factory.bSwEmergStopNC;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MachineStatusDisplay" Id="{b514ebdc-788c-439e-9684-5f92723d9151}">
+      <Declaration><![CDATA[METHOD MachineStatusDisplay
+VAR_INPUT
+    // Force update of displays
+    bForceUpdate: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Last part weight in gramms
+IF fbScale.bWeightIsUpdated OR bForceUpdate THEN
+    GVL_Factory.nDispWeight := REAL_TO_INT(fbScale.fWeightOut * 1000);
+END_IF
+
+// Increase part processing counter
+IF fbRemoverForward.bPartProcessed OR bForceUpdate THEN
+    GVL_Factory.nDispCountForward := UINT_TO_INT(nPartCountForward);
+END_IF
+IF fbRemoverLeft.bPartProcessed OR bForceUpdate THEN
+    GVL_Factory.nDispCountLeft := UINT_TO_INT(nPartCountLeft);
+END_IF
+IF fbRemoverRight.bPartProcessed OR bForceUpdate THEN
+    GVL_Factory.nDispCountRight := UINT_TO_INT(nPartCountRight);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>

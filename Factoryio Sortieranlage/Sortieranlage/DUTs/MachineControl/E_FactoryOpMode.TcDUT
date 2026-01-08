@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="E_DirectionSelect" Id="{3dd11271-3c8d-4e73-8679-866791950f66}">
+  <DUT Name="E_FactoryOpMode" Id="{c316459d-1ae2-4750-830f-f6e7f48ab971}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 {attribute 'to_string'}
-TYPE E_DirectionSelect :
+TYPE E_FactoryOpMode :
 (
-    UNDEFINED := -1,
-	FORWARD := 0,
-    LEFT,
-    RIGHT
+    HALTED,
+	RUNNING,
+    PAUSED,
+    RESET
 );
 END_TYPE
 ]]></Declaration>
