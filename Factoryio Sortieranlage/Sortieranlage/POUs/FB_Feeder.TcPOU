@@ -136,29 +136,5 @@ PartAtExit := TRUE;
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="tMovingTimeout" Id="{29a45c02-ab1e-4262-8ddc-dfbb68084338}">
-      <Declaration><![CDATA[// Part moving timeout
-{attribute 'monitoring' := 'call'}
-PROPERTY PUBLIC tMovingTimeout : TIME
-]]></Declaration>
-      <Get Name="Get" Id="{4a60306e-e9b7-4682-8cbb-3a15601b517d}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[tMovingTimeout := fbMovingTimeout.PT;
-]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{ec94b853-c8d5-4b26-9137-79b8d1d43967}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[fbMovingTimeout.PT := tMovingTimeout;
-]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
   </POU>
 </TcPlcObject>

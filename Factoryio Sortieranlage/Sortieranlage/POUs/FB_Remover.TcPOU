@@ -119,29 +119,5 @@ PartAtExit := TRUE;
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="tMovingTimeout" Id="{2efb2728-9f0d-43d3-862b-fd68db65250b}">
-      <Declaration><![CDATA[// Maximum duration for part to reach exit of conveyor
-{attribute 'monitoring' := 'call'}
-PROPERTY PUBLIC tMovingTimeout : TIME
-]]></Declaration>
-      <Get Name="Get" Id="{36db0884-f442-4f2e-9856-af33307f7eb1}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[tMovingTimeout := fbMovingTimeout.PT;
-]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{1a320144-ae0f-4a01-baec-2e883f795487}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[fbMovingTimeout.PT := tMovingTimeout;
-]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
   </POU>
 </TcPlcObject>

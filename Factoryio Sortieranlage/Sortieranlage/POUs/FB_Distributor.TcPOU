@@ -321,29 +321,5 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="tMovingTimeout" Id="{fd8b40d3-03d7-429f-95a6-24527044a734}">
-      <Declaration><![CDATA[// Part moving timeout
-{attribute 'monitoring' := 'call'}
-PROPERTY PUBLIC tMovingTimeout: TIME
-]]></Declaration>
-      <Get Name="Get" Id="{1e2d5898-33d5-426f-8fff-fa45557239d7}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[tMovingTimeout := fbMovingTimeout.PT;
-]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{e1c6492d-93e2-49e1-b776-7b0387e97fb5}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[fbMovingTimeout.PT := tMovingTimeout;
-]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
   </POU>
 </TcPlcObject>
