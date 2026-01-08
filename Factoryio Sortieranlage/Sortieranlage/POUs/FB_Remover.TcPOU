@@ -33,6 +33,9 @@ IF fbPartAtEntry.Q THEN
     nPartsOnConveyor := nPartsOnConveyor + 1;
 END_IF
 
+// Default to no part has been processed
+bPartProcessed := FALSE;
+
 // State machine: remover
 CASE eStateRemover OF
     R_IDLE:
@@ -64,6 +67,8 @@ CASE eStateRemover OF
             SUPER^.fbMovingTimeout.IN := FALSE;
             // Decrease counter by one part
             nPartsOnConveyor := nPartsOnConveyor - 1;
+            // One part has been processed
+            bPartProcessed := TRUE;
             IF nPartsOnConveyor > 0 THEN
                 eStateRemover := R_MOVE_PART;
             ELSE
