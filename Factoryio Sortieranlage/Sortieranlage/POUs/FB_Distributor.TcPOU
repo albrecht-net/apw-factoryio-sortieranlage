@@ -34,8 +34,7 @@ VAR
     // Selected remover direction for current part processed from module
     eCurrentRemoverDirection: E_DirectionSelect;
     // Current state of distributor
-    eStateDistributor: (D_IDLE, D_SET_DIRECTION, D_TRANSFER_TO_FOLLOWER, D_WAIT_FOR_FOLLOWER, D_LOCKOUT);
-
+    eStateDistributor: E_ModuleState;
 
     // Pointer to recipe for required part weight to select forward remover
     pPartsForward: POINTER TO REAL;
@@ -81,19 +80,19 @@ fbPartAtRemover();
 
 // State machine: distributor
 CASE eStateDistributor OF
-    D_IDLE:
+    E_ModuleState.IDLE:
         SUPER^.Stop(bRunOut := TRUE);
         SUPER^.fbMovingTimeout.IN := FALSE;
         bReadyToReceivePart := FALSE;
         IF eNextRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
-            eStateDistributor := D_SET_DIRECTION;
+            eStateDistributor := E_ModuleState.SET_DIRECTION;
         END_IF
         // IF bPartAtEntry THEN
         //     {info 'ToDo: throw warning: unannounced part, moving part to fallback direction'}
         //     eStateDistributor := D_SET_DIRECTION;
         // END_IF
 
-    D_SET_DIRECTION:
+    E_ModuleState.SET_DIRECTION:
         IF eNextRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
             eCurrentRemoverDirection := eNextRemoverDirection;
             eNextRemoverDirection := E_DirectionSelect.UNDEFINED;
@@ -121,12 +120,12 @@ CASE eStateDistributor OF
 
         IF bReleasePartTransfer THEN
             bReadyToReceivePart := TRUE;
-            eStateDistributor := D_TRANSFER_TO_FOLLOWER;
+            eStateDistributor := E_ModuleState.TRANSFER_TO_FOLLOWER;
         ELSE
-            eStateDistributor := D_WAIT_FOR_FOLLOWER;
+            eStateDistributor := E_ModuleState.WAIT_FOR_FOLLOWER;
         END_IF
 
-    D_WAIT_FOR_FOLLOWER:
+    E_ModuleState.WAIT_FOR_FOLLOWER:
         // Set temporary bReleasePartTransfer based of remover on current remover direction
         CASE eCurrentRemoverDirection OF
             E_DirectionSelect.FORWARD:
@@ -141,21 +140,21 @@ CASE eStateDistributor OF
 
         IF bReleasePartTransfer THEN
             bReadyToReceivePart := TRUE;
-            eStateDistributor := D_TRANSFER_TO_FOLLOWER;
+            eStateDistributor := E_ModuleState.TRANSFER_TO_FOLLOWER;
         END_IF
 
-    D_TRANSFER_TO_FOLLOWER:
+    E_ModuleState.TRANSFER_TO_FOLLOWER:
         bReadyToReceivePart := FALSE;
         SUPER^.Start();
         SUPER^.fbMovingTimeout.IN := TRUE;
         IF fbPartAtRemover.Q THEN
             SUPER^.fbMovingTimeout.IN := FALSE;
-            eStateDistributor := D_IDLE;
+            eStateDistributor := E_ModuleState.IDLE;
         END_IF
         IF SUPER^.fbMovingTimeout.Q THEN
             {info 'ToDo: throw error message: Part transfer moving timeout'}
             SUPER^.fbMovingTimeout.IN := FALSE;
-            eStateDistributor := D_IDLE;
+            eStateDistributor := E_ModuleState.IDLE;
         END_IF
 END_CASE
 ]]></ST>

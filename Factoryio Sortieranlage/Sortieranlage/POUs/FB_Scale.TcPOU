@@ -28,7 +28,7 @@ VAR
     // Part is complete on distributor
     fbPartAtDistributor: F_TRIG();
     // Current state of scale
-    eStateScale: (S_IDLE, S_MOVE_PART_TO_SCALE, S_WAIT_FOR_MEASUREMENT, S_EXECUTING_MEASUREMENT, S_WAIT_FOR_FOLLOWER, S_TRANSFER_TO_FOLLOWER, S_LOCKOUT);
+    eStateScale: E_ModuleState;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -42,72 +42,72 @@ bWeightIsUpdated := FALSE;
 
 // State machine: 
 CASE eStateScale OF
-    S_IDLE:
+    E_ModuleState.IDLE:
         SUPER^.Stop(bRunOut := TRUE);
         SUPER^.fbMovingTimeout.IN := FALSE;
         bReadyToReceivePart := TRUE;
         fbWeightTimeout.IN := FALSE;
         IF bPartAtEntry THEN
-            eStateScale := S_MOVE_PART_TO_SCALE;
+            eStateScale := E_ModuleState.MOVE_PART;
         END_IF
 
-    S_MOVE_PART_TO_SCALE:
+    E_ModuleState.MOVE_PART:
         bReadyToReceivePart := FALSE;
         SUPER^.Start();
         SUPER^.fbMovingTimeout.IN := TRUE;
         IF bPartOnScale THEN
             SUPER^.fbMovingTimeout.IN := FALSE;
-            eStateScale := S_WAIT_FOR_MEASUREMENT;
+            eStateScale := E_ModuleState.WAIT_FOR_MEASUREMENT;
         END_IF
         IF SUPER^.fbMovingTimeout.Q THEN
             {info 'ToDo: throw error message: Part moving timeout'}
             SUPER^.fbMovingTimeout.IN := FALSE;
-            eStateScale := S_IDLE;
+            eStateScale := E_ModuleState.IDLE;
         END_IF
  
-    S_WAIT_FOR_MEASUREMENT:
+    E_ModuleState.WAIT_FOR_MEASUREMENT:
         SUPER^.Stop(bRunOut := FALSE);
         fbWeightTimeout.IN := TRUE;
         IF fbWeightTimeout.Q THEN
             fbWeightTimeout.IN := FALSE;
-            eStateScale := S_EXECUTING_MEASUREMENT;
+            eStateScale := E_ModuleState.EXECUTING_MEASUREMENT;
         END_IF
         IF NOT bPartOnScale THEN
             {info 'ToDo: throw error message: Part has been removed from scale'}
             fbWeightTimeout.IN := FALSE;
-            eStateScale := S_IDLE;
+            eStateScale := E_ModuleState.IDLE;
         END_IF
 
-    S_EXECUTING_MEASUREMENT:
+    E_ModuleState.EXECUTING_MEASUREMENT:
         IF NOT bPartOnScale THEN
             {info 'ToDo: throw error message: Part has been removed from scale'}
-            eStateScale := S_IDLE;
+            eStateScale := E_ModuleState.IDLE;
         ELSE
             bWeightIsUpdated := TRUE;
             fWeightOut := fWeightIn;
             IF bReleasePartTransfer THEN
-                eStateScale := S_TRANSFER_TO_FOLLOWER;
+                eStateScale := E_ModuleState.TRANSFER_TO_FOLLOWER;
             ELSE
-                eStateScale := S_WAIT_FOR_FOLLOWER;
+                eStateScale := E_ModuleState.WAIT_FOR_FOLLOWER;
             END_IF
         END_IF
 
-    S_WAIT_FOR_FOLLOWER:
+    E_ModuleState.WAIT_FOR_FOLLOWER:
         IF bReleasePartTransfer THEN
-            eStateScale := S_TRANSFER_TO_FOLLOWER;
+            eStateScale := E_ModuleState.TRANSFER_TO_FOLLOWER;
         END_IF
 
-    S_TRANSFER_TO_FOLLOWER:
+    E_ModuleState.TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
         SUPER^.fbMovingTimeout.IN := TRUE;
         IF fbPartAtDistributor.Q THEN
             SUPER^.fbMovingTimeout.IN := FALSE;
-            eStateScale := S_IDLE;
+            eStateScale := E_ModuleState.IDLE;
         END_IF
         IF SUPER^.fbMovingTimeout.Q THEN
             {info 'ToDo: throw error message: Part moving timeout'}
             SUPER^.fbMovingTimeout.IN := FALSE;
-            eStateScale := S_IDLE;
+            eStateScale := E_ModuleState.IDLE;
         END_IF
 END_CASE
 ]]></ST>

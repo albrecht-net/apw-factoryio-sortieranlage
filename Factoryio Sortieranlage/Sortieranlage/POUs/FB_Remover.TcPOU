@@ -20,7 +20,7 @@ VAR
     // Count parts entering remover conveyor
     nPartsOnConveyor: INT;
     // Current state of distributor
-    eStateRemover: (R_IDLE, R_MOVE_PART, R_TRANSFER_TO_FOLLOWER, R_EMPTY_CONVEYOR, R_LOCKOUT);
+    eStateRemover: E_ModuleState;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -38,15 +38,15 @@ bPartProcessed := FALSE;
 
 // State machine: remover
 CASE eStateRemover OF
-    R_IDLE:
+    E_ModuleState.IDLE:
         SUPER^.Stop(bRunOut := TRUE);
         SUPER^.fbMovingTimeout.IN := FALSE;
         bReadyToReceivePart := TRUE;
         IF nPartsOnConveyor > 0 THEN
-            eStateRemover := R_MOVE_PART;
+            eStateRemover := E_ModuleState.MOVE_PART;
         END_IF
 
-    R_MOVE_PART:
+    E_ModuleState.MOVE_PART:
         SUPER^.Start();
         SUPER^.fbMovingTimeout.IN := TRUE;
         IF PartAtExit() THEN
@@ -57,10 +57,10 @@ CASE eStateRemover OF
             SUPER^.fbMovingTimeout.IN := FALSE;
             // Reset counter to 0 is moving timeout occurred
             nPartsOnConveyor := 0;
-            eStateRemover := R_IDLE;
+            eStateRemover := E_ModuleState.IDLE;
         END_IF
 
-    R_TRANSFER_TO_FOLLOWER:
+    E_ModuleState.TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
         SUPER^.fbMovingTimeout.IN := TRUE;
         IF NOT bPartAtExit THEN
@@ -70,10 +70,10 @@ CASE eStateRemover OF
             // One part has been processed
             bPartProcessed := TRUE;
             IF nPartsOnConveyor > 0 THEN
-                eStateRemover := R_MOVE_PART;
+                eStateRemover := E_ModuleState.MOVE_PART;
             ELSE
                 nPartsOnConveyor := 0;
-                eStateRemover := R_IDLE;
+                eStateRemover := E_ModuleState.IDLE;
             END_IF
         END_IF
         IF SUPER^.fbMovingTimeout.Q THEN
@@ -81,7 +81,7 @@ CASE eStateRemover OF
             SUPER^.fbMovingTimeout.IN := FALSE;
             // Reset counter to 0 is moving timeout occurred
             nPartsOnConveyor := 0;
-            eStateRemover := R_IDLE;
+            eStateRemover := E_ModuleState.IDLE;
         END_IF
 END_CASE
 ]]></ST>
@@ -94,7 +94,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF bPartAtExit THEN
-    eStateRemover := R_TRANSFER_TO_FOLLOWER;
+    eStateRemover := E_ModuleState.TRANSFER_TO_FOLLOWER;
 ELSE
     PartAtExit := FALSE;
     RETURN;
