@@ -112,6 +112,21 @@ CASE eStateScale OF
 END_CASE
 ]]></ST>
     </Implementation>
+    <Property Name="eModuleState" Id="{4c966167-e82c-4bac-993e-638c50ad0f2d}">
+      <Declaration><![CDATA[// Current state of scale
+{attribute 'monitoring' := 'variable'}
+PROPERTY eModuleState: E_ModuleState
+]]></Declaration>
+      <Get Name="Get" Id="{42f03cd0-ad80-40a6-8cbc-3fea4bdc42a1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eModuleState := eStateScale;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="tWeightTimeout" Id="{124ea750-2d7e-42e4-b4a8-045258bc5dca}">
       <Declaration><![CDATA[// Timeout before store measured weight of part
 {attribute 'monitoring' := 'call'}

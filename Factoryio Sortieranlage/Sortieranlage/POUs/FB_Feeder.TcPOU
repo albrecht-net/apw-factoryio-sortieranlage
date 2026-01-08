@@ -90,6 +90,21 @@ END_CASE
 bEnable := FALSE;
 ]]></ST>
     </Implementation>
+    <Property Name="eModuleState" Id="{5c3a84b7-6617-4ab9-b48a-46ca6e10fba0}">
+      <Declaration><![CDATA[// Current state of feeder
+{attribute 'monitoring' := 'variable'}
+PROPERTY eModuleState: E_ModuleState
+]]></Declaration>
+      <Get Name="Get" Id="{3ef86f2a-3914-4d89-af92-416fa2a9e417}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eModuleState := eStateFeeder;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="Enable" Id="{5968398c-874e-4b04-a814-7d741cce27ab}">
       <Declaration><![CDATA[// Enable processing of parts
 METHOD Enable: BOOL

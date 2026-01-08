@@ -240,6 +240,21 @@ END_IF
         </Implementation>
       </Set>
     </Property>
+    <Property Name="eModuleState" Id="{dfa96209-b81f-44ed-ac9a-6947408df085}">
+      <Declaration><![CDATA[// Current state of distributor
+{attribute 'monitoring' := 'variable'}
+PROPERTY eModuleState: E_ModuleState
+]]></Declaration>
+      <Get Name="Get" Id="{0781f05e-109f-43e2-a42f-3b5e34887167}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eModuleState := eStateDistributor;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="FB_Init" Id="{8ccda915-7be0-4cc6-b73b-628f2c240386}">
       <Declaration><![CDATA[// FB_Init is always available implicitly and it is used primarily for initialization.
 // The return value is not evaluated. For a specific influence, you can also declare the

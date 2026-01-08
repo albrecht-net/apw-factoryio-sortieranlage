@@ -19,7 +19,7 @@ VAR
     fbPartAtEntry: R_TRIG();
     // Count parts entering remover conveyor
     nPartsOnConveyor: INT;
-    // Current state of distributor
+    // Current state of remover conveyor
     eStateRemover: E_ModuleState;
 END_VAR
 ]]></Declaration>
@@ -86,6 +86,21 @@ CASE eStateRemover OF
 END_CASE
 ]]></ST>
     </Implementation>
+    <Property Name="eModuleState" Id="{5f93ed0e-45ac-42eb-a5d0-ac97aa782dbd}">
+      <Declaration><![CDATA[// Current state of remover conveyor
+{attribute 'monitoring' := 'variable'}
+PROPERTY eModuleState: E_ModuleState
+]]></Declaration>
+      <Get Name="Get" Id="{89c80246-cef3-4320-844b-d3cb8ce8d542}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eModuleState := eStateRemover;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="PartAtExit" Id="{819b3435-f3e7-4c82-a928-abcde45f2cf7}">
       <Declaration><![CDATA[// Return TRUE if part reach conveyor exit and state machine will go to next step
 METHOD PRIVATE PartAtExit: BOOL

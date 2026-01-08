@@ -7,6 +7,8 @@ VAR_INPUT
     stMachineControl: ST_MachineControl;
 END_VAR
 VAR_OUTPUT
+    // Conveyor is not ready and locked
+    bError: BOOL;
     // Output to conveyor motor
     bConveyorOn: BOOL;
 END_VAR
@@ -16,7 +18,7 @@ VAR
     // Run-down-timeout after normal stop
     fbRunDownTimeout: TOF;
     // Current state of conveyor
-    eStateConveyor: (C_IDLE, C_RUNNING, C_RUNNING_OUT, C_LOCKOUT);
+    eStateConveyor: E_ConveyorState;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -30,39 +32,64 @@ END_IF
 
 // Emergency stop is active
 IF NOT stMachineControl.bEmergStopNC THEN
-    eStateConveyor := C_LOCKOUT;
+    eStateConveyor := E_ConveyorState.LOCKOUT;
 END_IF
 
 
 CASE eStateConveyor OF
-    C_IDLE:
+    E_ConveyorState.IDLE:
         bConveyorOn := FALSE;
         fbRunDownTimeout.IN := FALSE;
 
-    C_RUNNING:
+    E_ConveyorState.RUNNING:
         bConveyorOn := TRUE;
         fbRunDownTimeout.IN := TRUE;
 
-    C_RUNNING_OUT:
+    E_ConveyorState.RUNNING_OUT:
         fbRunDownTimeout.IN := FALSE;
         IF NOT fbRunDownTimeout.Q OR fbRunDownTimeout.PT = T#0S THEN
-            eStateConveyor := C_IDLE;
+            eStateConveyor := E_ConveyorState.IDLE;
         END_IF
 
-    C_LOCKOUT:
+    E_ConveyorState.LOCKOUT:
         bConveyorOn := FALSE;
         fbRunDownTimeout.IN := FALSE;
+        bError := TRUE;
 END_CASE
 ]]></ST>
     </Implementation>
+    <Property Name="eConveyorState" Id="{c3c22aa1-1a18-495f-91a9-7da878b9c7e7}">
+      <Declaration><![CDATA[// Current state of conveyor
+{attribute 'monitoring' := 'variable'}
+PROPERTY eConveyorState: E_ConveyorState
+]]></Declaration>
+      <Get Name="Get" Id="{1445cc84-0e35-4174-91ff-eebc02a4d2d3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eConveyorState := eStateConveyor;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="eModuleState" Id="{74c927eb-91d7-4392-ab5b-d53da1471de4}">
+      <Declaration><![CDATA[// Current state of the module
+PROPERTY ABSTRACT eModuleState: E_ModuleState
+]]></Declaration>
+      <Get Name="Get" Id="{7747a88a-9ba4-4fd0-9a75-7ce9bf665dac}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
     <Method Name="Reset" Id="{c6f9219d-30dc-4aaa-a52b-80bf5ad63bc8}">
       <Declaration><![CDATA[METHOD PUBLIC Reset
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF stMachineControl.bEmergStopNC AND eStateConveyor = C_LOCKOUT THEN
-    eStateConveyor := C_IDLE;
+        <ST><![CDATA[IF stMachineControl.bEmergStopNC AND eStateConveyor = E_ConveyorState.LOCKOUT THEN
+    bError := FALSE;
+    eStateConveyor := E_ConveyorState.IDLE;
 END_IF
 ]]></ST>
       </Implementation>
@@ -73,8 +100,8 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF eStateConveyor = C_IDLE OR eStateConveyor = C_RUNNING_OUT THEN
-    eStateConveyor := C_RUNNING;
+        <ST><![CDATA[IF eStateConveyor = E_ConveyorState.IDLE OR eStateConveyor = E_ConveyorState.RUNNING_OUT THEN
+    eStateConveyor := E_ConveyorState.RUNNING;
 END_IF
 ]]></ST>
       </Implementation>
@@ -87,14 +114,14 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF eStateConveyor = C_RUNNING THEN
+        <ST><![CDATA[IF eStateConveyor = E_ConveyorState.RUNNING THEN
     // Stop converyor with timeout before halt
     IF fbRunDownTimeout.PT > T#0S AND bRunOut THEN
-        eStateConveyor := C_RUNNING_OUT;
+        eStateConveyor := E_ConveyorState.RUNNING_OUT;
 
     // Stop conveyor immediately
     ELSE
-        eStateConveyor := C_IDLE;
+        eStateConveyor := E_ConveyorState.IDLE;
     END_IF
 END_IF
 ]]></ST>
