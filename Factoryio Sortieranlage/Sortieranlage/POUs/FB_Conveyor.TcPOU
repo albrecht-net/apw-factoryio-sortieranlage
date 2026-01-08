@@ -11,15 +11,24 @@ VAR_OUTPUT
     bConveyorOn: BOOL;
 END_VAR
 VAR
+    // Part moving timeout
+    fbMovingTimeout: TON;
     // Run-down-timeout after normal stop
-    fbRunDown: TOF;
+    fbRunDownTimeout: TOF;
     // Current state of conveyor
     eStateConveyor: (C_IDLE, C_RUNNING, C_RUNNING_OUT, C_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// Cyclic call of timer for run-down-timeout after normal stop
-fbRunDown();
+      <ST><![CDATA[// Cyclic call of timer for moving timeout in derived function block
+IF fbMovingTimeout.PT > T#0S THEN
+    fbMovingTimeout();
+END_IF
+
+// Cyclic call of timer for run-down-timeout after normal stop
+IF fbRunDownTimeout.PT > T#0S THEN
+    fbRunDownTimeout();
+END_IF
 
 // Emergency stop is active
 IF NOT stMachineControl.bEmergStopNC THEN
@@ -30,21 +39,21 @@ END_IF
 CASE eStateConveyor OF
     C_IDLE:
         bConveyorOn := FALSE;
-        fbRunDown.IN := FALSE;
+        fbRunDownTimeout.IN := FALSE;
 
     C_RUNNING:
         bConveyorOn := TRUE;
-        fbRunDown.IN := TRUE;
+        fbRunDownTimeout.IN := TRUE;
 
     C_RUNNING_OUT:
-        fbRunDown.IN := FALSE;
-        IF NOT fbRunDown.Q THEN
+        fbRunDownTimeout.IN := FALSE;
+        IF NOT fbRunDownTimeout.Q OR fbRunDownTimeout.PT = T#0S THEN
             eStateConveyor := C_IDLE;
         END_IF
 
     C_LOCKOUT:
         bConveyorOn := FALSE;
-        fbRunDown.IN := FALSE;
+        fbRunDownTimeout.IN := FALSE;
 END_CASE
 ]]></ST>
     </Implementation>
@@ -82,7 +91,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[IF eStateConveyor = C_RUNNING THEN
     // Stop converyor with timeout before halt
-    IF fbRunDown.PT > T#0S AND bRunOut THEN
+    IF fbRunDownTimeout.PT > T#0S AND bRunOut THEN
         eStateConveyor := C_RUNNING_OUT;
 
     // Stop conveyor immediately
@@ -93,17 +102,41 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="tStoppingTimeout" Id="{4b764709-8d3d-4944-95b7-04a2d130102e}">
+    <Property Name="tMovingTimeout" Id="{d6846ea9-b660-4c68-926b-4c307d706c12}">
+      <Declaration><![CDATA[// Part moving timeout
+{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC tMovingTimeout: TIME
+]]></Declaration>
+      <Get Name="Get" Id="{ef2e8eb8-38a9-4c47-a0e6-f0b2558ec260}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[tMovingTimeout := fbMovingTimeout.PT;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{37f62f04-9445-4ecc-aab4-6c0bc2cfc248}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbMovingTimeout.PT := tMovingTimeout;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="tRunDownTimeout" Id="{4b764709-8d3d-4944-95b7-04a2d130102e}">
       <Declaration><![CDATA[// Run-down-timeout after normal stop
 {attribute 'monitoring' := 'call'}
-PROPERTY PUBLIC tStoppingTimeout: TIME
+PROPERTY PUBLIC tRunDownTimeout: TIME
 ]]></Declaration>
       <Get Name="Get" Id="{245e477e-a008-409d-aec7-abdc2592ce40}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[tStoppingTimeout := fbRunDown.PT;
+          <ST><![CDATA[tRunDownTimeout := fbRunDownTimeout.PT;
 ]]></ST>
         </Implementation>
       </Get>
@@ -112,7 +145,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[fbRunDown.PT := tStoppingTimeout;
+          <ST><![CDATA[fbRunDownTimeout.PT := tRunDownTimeout;
 ]]></ST>
         </Implementation>
       </Set>

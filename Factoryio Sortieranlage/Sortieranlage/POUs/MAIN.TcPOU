@@ -9,7 +9,7 @@ VAR
     stMachineControl: ST_MachineControl;
     
     fbFeeder: FB_Feeder() := (tMovingTimeout := T#4S);
-    fbScale: FB_Scale() := (tStoppingTimeout := T#3S, tWaitBeforeMeasure := T#2S);
+    fbScale: FB_Scale() := (tRunDownTimeout := T#3S, tWaitBeforeMeasure := T#2S);
     fbDistributor: FB_Distributor(
         pForward := ADR(aRecipePartsForward),
         nForwardSize := XSIZEOF(aRecipePartsForward),
@@ -18,16 +18,16 @@ VAR
         pRight := ADR(aRecipePartsRight),
         nRightSize := XSIZEOF(aRecipePartsRight)
     ) := (
-        tStoppingTimeout := T#1S,
+        tRunDownTimeout := T#1S,
         tMovingTimeout := T#4S,
         eFallbackRemoverDirection := E_DirectionSelect.RIGHT,
         fPartWeightTolerance := 0.1,
         tMovingTimeout := T#5S,
-        tStoppingTimeout := T#3S
+        tRunDownTimeout := T#3S
     );
-    fbRemoverForward: FB_Remover() := (tStoppingTimeout := T#3S, tMovingTimeout := T#5S);
-    fbRemoverLeft: FB_Remover() := (tStoppingTimeout := T#3S, tMovingTimeout := T#5S);
-    fbRemoverRight: FB_Remover() := (tStoppingTimeout := T#3S, tMovingTimeout := T#5S);
+    fbRemoverForward: FB_Remover() := (tRunDownTimeout := T#3S, tMovingTimeout := T#5S);
+    fbRemoverLeft: FB_Remover() := (tRunDownTimeout := T#3S, tMovingTimeout := T#5S);
+    fbRemoverRight: FB_Remover() := (tRunDownTimeout := T#3S, tMovingTimeout := T#5S);
 END_VAR
 VAR PERSISTENT
     aRecipePartsForward: ARRAY[0..6] OF REAL := [1.5, 4.0, 5.0, 7.5];
