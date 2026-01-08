@@ -45,7 +45,7 @@ CASE eStateRemover OF
         IF PartAtExit() THEN
             fbMovingTimeout.IN := FALSE;
         ELSIF fbMovingTimeout.Q THEN
-            // Throw error message: Part moving timeout
+            {info 'ToDo: throw error message: Part moving timeout'}
             fbMovingTimeout.IN := FALSE;
             nPartsOnConveyor := 0;
             eStateRemover := R_IDLE;
@@ -65,7 +65,7 @@ CASE eStateRemover OF
             END_IF
         END_IF
         IF fbMovingTimeout.Q THEN
-            // Throw error message: Part transfer moving timeout
+            {info 'ToDo: throw error message: Part transfer moving timeout'}
             fbMovingTimeout.IN := FALSE;
             nPartsOnConveyor := 0;
             eStateRemover := R_IDLE;

@@ -60,7 +60,7 @@ CASE eStateFeeder OF
     F_TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
         fbMovingTimeout.IN := TRUE;
-        IF NOT bPartAtExit AND NOT bEnable THEN
+        IF NOT bPartAtExit THEN
             fbMovingTimeout.IN := FALSE;
             IF bEnable THEN
                 eStateFeeder := F_MOVE_PART;

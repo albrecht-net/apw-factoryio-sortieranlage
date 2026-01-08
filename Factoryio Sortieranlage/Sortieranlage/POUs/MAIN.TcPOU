@@ -3,14 +3,36 @@
   <POU Name="MAIN" Id="{057ae4a3-2787-4424-9a6b-bc231d52e4b1}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-    bVal: BOOL;
+    bInit: BOOL;
+    bEnable: BOOL;
+	bReset: BOOL;
+    stMachineControl: ST_MachineControl;
     
     fbFeeder: FB_Feeder() := (tMovingTimeout := T#4S);
     fbScale: FB_Scale() := (tStoppingTimeout := T#3S, tWaitBeforeMeasure := T#2S);
+    fbDistributor: FB_Distributor(
+        pForward := ADR(aRecipePartsForward),
+        nForwardSize := XSIZEOF(aRecipePartsForward),
+        pLeft := ADR(aRecipePartsLeft),
+        nLeftSize := XSIZEOF(aRecipePartsLeft),
+        pRight := ADR(aRecipePartsRight),
+        nRightSize := XSIZEOF(aRecipePartsRight)
+    ) := (
+        tStoppingTimeout := T#1S,
+        tMovingTimeout := T#4S,
+        eFallbackRemoverDirection := E_DirectionSelect.RIGHT,
+        fPartWeightTolerance := 0.1,
+        tMovingTimeout := T#5S,
+        tStoppingTimeout := T#3S
+    );
     fbRemoverForward: FB_Remover() := (tStoppingTimeout := T#3S, tMovingTimeout := T#5S);
-
-    stMachineControl: ST_MachineControl;
-	bReset: BOOL;
+    fbRemoverLeft: FB_Remover() := (tStoppingTimeout := T#3S, tMovingTimeout := T#5S);
+    fbRemoverRight: FB_Remover() := (tStoppingTimeout := T#3S, tMovingTimeout := T#5S);
+END_VAR
+VAR PERSISTENT
+    aRecipePartsForward: ARRAY[0..6] OF REAL := [1.5, 4.0, 5.0, 7.5];
+    aRecipePartsLeft: ARRAY[0..6] OF REAL := [3.5];
+    aRecipePartsRight: ARRAY[0..6] OF REAL := [2.5];
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -21,11 +43,50 @@ stMachineControl.bManual := GVL_Factory.bSwManual;
 stMachineControl.bAuto := GVL_Factory.bSwAuto;
 stMachineControl.bEmergStopNC := GVL_Factory.bSwEmergStopNC;
 
-fbFeeder(stMachineControl := stMachineControl, bPartAtExit := NOT GVL_Factory.bLbScaleEntryNC, bReleasePartTransfer := fbScale.bReadyToReceivePart);
-fbScale(stMachineControl := stMachineControl, bPartAtEntry := NOT GVL_Factory.bLbScaleEntryNC, bPartOnScale := GVL_Factory.bLbScale, bPartAtExit := GVL_Factory.bLbScaleExit, fWeightIn := GVL_Factory.fScaleWeight, bReleasePartTransfer := fbRemoverForward.bReadyToReceivePart);
-fbRemoverForward(stMachineControl := stMachineControl, bPartAtExit := NOT GVL_Factory.bLbConveyorForwardExitNC, bPartAtEntry := GVL_Factory.bLbConveyorForwardEntry);
+fbFeeder(
+    stMachineControl := stMachineControl,
+    bPartAtExit := NOT GVL_Factory.bLbScaleEntryNC,
+    bReleasePartTransfer := fbScale.bReadyToReceivePart
+);
+fbScale(
+    stMachineControl := stMachineControl,
+    bPartAtEntry := NOT GVL_Factory.bLbScaleEntryNC,
+    bPartOnScale := GVL_Factory.bLbScale,
+    bPartAtExit := GVL_Factory.bLbScaleExit,
+    fWeightIn := GVL_Factory.fScaleWeight,
+    bReleasePartTransfer := fbDistributor.bReadyToReceivePart
+);
+fbDistributor(
+	stMachineControl := stMachineControl,
+	bPartAtEntry := GVL_Factory.bLbScaleExit,
+	bPartAtExitForward := GVL_Factory.bLbConveyorForwardEntry,
+	bPartAtExitLeft := GVL_Factory.bLbConveyorLeftEntry,
+	bPartAtExitRight := GVL_Factory.bLbConveyorRightEntry,
+	bReleasePartTransferForward := fbRemoverForward.bReadyToReceivePart,
+	bReleasePartTransferLeft := fbRemoverLeft.bReadyToReceivePart,
+	bReleasePartTransferRight := fbRemoverRight.bReadyToReceivePart
+);
+fbRemoverForward(
+    stMachineControl := stMachineControl,
+    bPartAtExit := NOT GVL_Factory.bLbConveyorForwardExitNC,
+    bPartAtEntry := GVL_Factory.bLbConveyorForwardEntry
+);
+fbRemoverLeft(
+    stMachineControl := stMachineControl,
+    bPartAtExit := NOT GVL_Factory.bLbConveyorLeftExitNC,
+    bPartAtEntry := GVL_Factory.bLbConveyorLeftEntry
+);
+fbRemoverRight(
+    stMachineControl := stMachineControl,
+    bPartAtExit := NOT GVL_Factory.bLbConveyorRightExitNC,
+    bPartAtEntry := GVL_Factory.bLbConveyorRightEntry
+);
 
-IF bVal THEN
+IF fbScale.bWeightIsUpdated THEN
+    fbDistributor.AnnounceNextPart(fWeight := fbScale.fWeightOut);
+END_IF
+
+IF bEnable THEN
     fbFeeder.Enable();
 END_IF
 
@@ -39,7 +100,12 @@ END_IF
 GVL_Factory.bEmitter := fbFeeder.bEmitter;
 GVL_Factory.bConveyorFeed := fbFeeder.bConveyorOn;
 GVL_Factory.bConveyorScale := fbScale.bConveyorOn;
+GVL_Factory.bSorterRaise := fbDistributor.bConveyorOn; 
+GVL_Factory.bSorterLeft := fbDistributor.bConveyorToLeft;
+GVL_Factory.bSorterRight := fbDistributor.bConveyorToRight; 
 GVL_Factory.bConveyorForward := fbRemoverForward.bConveyorOn;
+GVL_Factory.bConveyorLeft := fbRemoverLeft.bConveyorOn;
+GVL_Factory.bConveyorRight := fbRemoverRight.bConveyorOn;
 ]]></ST>
     </Implementation>
   </POU>

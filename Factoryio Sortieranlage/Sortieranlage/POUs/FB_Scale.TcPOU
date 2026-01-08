@@ -42,11 +42,11 @@ CASE eStateScale OF
         SUPER^.Stop(bRunOut := TRUE);
         bReadyToReceivePart := TRUE;
         IF bPartAtEntry THEN
+            bReadyToReceivePart := FALSE;
             eStateScale := S_MOVE_PART_TO_SCALE;
         END_IF
 
     S_MOVE_PART_TO_SCALE:
-        bReadyToReceivePart := FALSE;
         SUPER^.Start();
         IF bPartOnScale THEN
             eStateScale := S_WAIT_FOR_MEASUREMENT;
@@ -56,11 +56,11 @@ CASE eStateScale OF
         SUPER^.Stop(bRunOut := FALSE);
         fbWeightTimeout.IN := TRUE;
         IF fbWeightTimeout.Q THEN
+            fbWeightTimeout.IN := FALSE;
             eStateScale := S_EXECUTING_MEASUREMENT;
         END_IF
 
     S_EXECUTING_MEASUREMENT:
-        fbWeightTimeout.IN := FALSE;
         bWeightIsUpdated := TRUE;
         fWeightOut := fWeightIn;
         IF bReleasePartTransfer THEN

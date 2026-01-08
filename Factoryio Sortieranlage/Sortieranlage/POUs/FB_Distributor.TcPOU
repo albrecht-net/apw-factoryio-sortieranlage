@@ -84,6 +84,7 @@ fbPartAtRemover();
 CASE eStateDistributor OF
     D_IDLE:
         SUPER^.Stop(bRunOut := TRUE);
+        fbMovingTimeout.IN := FALSE;
         IF eNextRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
             eStateDistributor := D_SET_DIRECTION;
         END_IF
@@ -172,7 +173,7 @@ END_VAR
 nIndex := 0;
 WHILE nIndex <= nPartsForwardLength - 1 DO
     // Lookup fWeight in recipe
-    IF fWeight > pPartsForward[nIndex] - fPartWeightTolerance AND fWeight < pPartsForward[nIndex] + fPartWeightTolerance THEN
+    IF fWeight >= pPartsForward[nIndex] - fPartWeightTolerance AND fWeight <= pPartsForward[nIndex] + fPartWeightTolerance THEN
         eNextRemoverDirection := E_DirectionSelect.FORWARD;
         RETURN;
     END_IF
@@ -184,7 +185,7 @@ END_WHILE
 nIndex := 0;
 WHILE nIndex <= nPartsLeftLength - 1 DO
     // Lookup fWeight in recipe
-    IF fWeight > pPartsLeft[nIndex] - fPartWeightTolerance AND fWeight < pPartsLeft[nIndex] + fPartWeightTolerance THEN
+    IF fWeight >= pPartsLeft[nIndex] - fPartWeightTolerance AND fWeight <= pPartsLeft[nIndex] + fPartWeightTolerance THEN
         eNextRemoverDirection := E_DirectionSelect.LEFT;
         RETURN;
     END_IF
@@ -196,7 +197,7 @@ END_WHILE
 nIndex := 0;
 WHILE nIndex <= nPartsRightLength - 1 DO
     // Lookup fWeight in recipe
-    IF fWeight > pPartsRight[nIndex] - fPartWeightTolerance AND fWeight < pPartsRight[nIndex] + fPartWeightTolerance THEN
+    IF fWeight >= pPartsRight[nIndex] - fPartWeightTolerance AND fWeight <= pPartsRight[nIndex] + fPartWeightTolerance THEN
         eNextRemoverDirection := E_DirectionSelect.RIGHT;
         RETURN;
     END_IF
