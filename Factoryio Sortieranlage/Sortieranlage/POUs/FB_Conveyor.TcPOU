@@ -21,9 +21,7 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Cyclic call of timer for moving timeout in derived function block
-IF fbMovingTimeout.PT > T#0S THEN
-    fbMovingTimeout();
-END_IF
+fbMovingTimeout();
 
 // Cyclic call of timer for run-down-timeout after normal stop
 IF fbRunDownTimeout.PT > T#0S THEN

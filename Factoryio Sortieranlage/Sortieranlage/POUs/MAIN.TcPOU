@@ -9,7 +9,7 @@ VAR
     stMachineControl: ST_MachineControl;
     
     fbFeeder: FB_Feeder() := (tMovingTimeout := T#4S);
-    fbScale: FB_Scale() := (tRunDownTimeout := T#3S, tWeightTimeout := T#2S);
+    fbScale: FB_Scale() := (tRunDownTimeout := T#3S, tMovingTimeout := T#4S, tWeightTimeout := T#2S);
     fbDistributor: FB_Distributor(
         pForward := ADR(aRecipePartsForward),
         nForwardSize := XSIZEOF(aRecipePartsForward),

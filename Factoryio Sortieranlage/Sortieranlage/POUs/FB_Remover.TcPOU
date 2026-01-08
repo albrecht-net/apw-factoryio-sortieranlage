@@ -15,8 +15,6 @@ VAR_OUTPUT
     bPartProcessed: BOOL;
 END_VAR
 VAR
-    // Part moving timeout
-    fbMovingTimeout: TON;
     // Part entering remover conveyor
     fbPartAtEntry: R_TRIG();
     // Count parts entering remover conveyor

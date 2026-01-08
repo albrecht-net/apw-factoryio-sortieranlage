@@ -48,11 +48,11 @@ CASE eStateScale OF
         bReadyToReceivePart := TRUE;
         fbWeightTimeout.IN := FALSE;
         IF bPartAtEntry THEN
-            bReadyToReceivePart := FALSE;
             eStateScale := S_MOVE_PART_TO_SCALE;
         END_IF
 
     S_MOVE_PART_TO_SCALE:
+        bReadyToReceivePart := FALSE;
         SUPER^.Start();
         SUPER^.fbMovingTimeout.IN := TRUE;
         IF bPartOnScale THEN
