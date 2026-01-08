@@ -27,8 +27,6 @@ VAR_OUTPUT
     bConveyorToRight: BOOL;
 END_VAR
 VAR
-    // Part moving timeout
-    fbMovingTimeout: TON;
     // Part is fully on remover conveyor
     fbPartAtRemover: F_TRIG();
     // Selected remover direction for next part
@@ -65,10 +63,7 @@ VAR_TEMP
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[SUPER^();
-fbMovingTimeout();
-
-// Based on current direction: part is fully on remover conveyor 
+      <ST><![CDATA[// Based on current direction: determine if part is fully on remover conveyor 
 CASE eCurrentRemoverDirection OF
     E_DirectionSelect.FORWARD:
         fbPartAtRemover.CLK := bPartAtExitForward;
@@ -79,19 +74,24 @@ CASE eCurrentRemoverDirection OF
     E_DirectionSelect.RIGHT:
         fbPartAtRemover.CLK := bPartAtExitRight;
 END_CASE
+
+// Cyclic calls of function block instances
+SUPER^();
 fbPartAtRemover();
 
+// State machine: distributor
 CASE eStateDistributor OF
     D_IDLE:
         SUPER^.Stop(bRunOut := TRUE);
-        fbMovingTimeout.IN := FALSE;
+        SUPER^.fbMovingTimeout.IN := FALSE;
+        bReadyToReceivePart := FALSE;
         IF eNextRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
             eStateDistributor := D_SET_DIRECTION;
         END_IF
-        IF bPartAtEntry THEN
-            {info 'ToDo: throw warning: unannounced part, moving to fallback direction'}
-            eStateDistributor := D_SET_DIRECTION;
-        END_IF
+        // IF bPartAtEntry THEN
+        //     {info 'ToDo: throw warning: unannounced part, moving part to fallback direction'}
+        //     eStateDistributor := D_SET_DIRECTION;
+        // END_IF
 
     D_SET_DIRECTION:
         IF eNextRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
@@ -101,6 +101,7 @@ CASE eStateDistributor OF
             eCurrentRemoverDirection := eFallbackRemoverDirection;
         END_IF
 
+        // Set temporary bReleasePartTransfer based of remover on current remover direction
         CASE eCurrentRemoverDirection OF
             E_DirectionSelect.FORWARD:
                 bConveyorToLeft := FALSE;
@@ -126,6 +127,7 @@ CASE eStateDistributor OF
         END_IF
 
     D_WAIT_FOR_FOLLOWER:
+        // Set temporary bReleasePartTransfer based of remover on current remover direction
         CASE eCurrentRemoverDirection OF
             E_DirectionSelect.FORWARD:
                 bReleasePartTransfer := bReleasePartTransferForward;
@@ -145,17 +147,18 @@ CASE eStateDistributor OF
     D_TRANSFER_TO_FOLLOWER:
         bReadyToReceivePart := FALSE;
         SUPER^.Start();
-        fbMovingTimeout.IN := TRUE;
+        SUPER^.fbMovingTimeout.IN := TRUE;
         IF fbPartAtRemover.Q THEN
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
             eStateDistributor := D_IDLE;
         END_IF
-        IF fbMovingTimeout.Q THEN
+        IF SUPER^.fbMovingTimeout.Q THEN
             {info 'ToDo: throw error message: Part transfer moving timeout'}
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
             eStateDistributor := D_IDLE;
         END_IF
-END_CASE]]></ST>
+END_CASE
+]]></ST>
     </Implementation>
     <Method Name="AnnounceNextPart" Id="{e5b684ce-5fdf-4ef5-9c7e-5eb2e12068bd}">
       <Declaration><![CDATA[METHOD AnnounceNextPart

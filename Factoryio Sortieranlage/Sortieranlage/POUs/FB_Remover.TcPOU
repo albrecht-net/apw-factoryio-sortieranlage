@@ -11,29 +11,35 @@ END_VAR
 VAR_OUTPUT
     // Module is ready to receive part
     bReadyToReceivePart: BOOL;
+    // Remover processed one part
     bPartProcessed: BOOL;
 END_VAR
 VAR
     // Part moving timeout
     fbMovingTimeout: TON;
+    // Part entering remover conveyor
     fbPartAtEntry: R_TRIG();
+    // Count parts entering remover conveyor
     nPartsOnConveyor: INT;
     // Current state of distributor
     eStateRemover: (R_IDLE, R_MOVE_PART, R_TRANSFER_TO_FOLLOWER, R_EMPTY_CONVEYOR, R_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[SUPER^();
-fbMovingTimeout();
+      <ST><![CDATA[// Cyclic calls of function block instances
+SUPER^();
 fbPartAtEntry(CLK := bPartAtEntry);
 
+// Count parts entering remover conveyor
 IF fbPartAtEntry.Q THEN
     nPartsOnConveyor := nPartsOnConveyor + 1;
 END_IF
 
+// State machine: remover
 CASE eStateRemover OF
     R_IDLE:
         SUPER^.Stop(bRunOut := TRUE);
+        SUPER^.fbMovingTimeout.IN := FALSE;
         bReadyToReceivePart := TRUE;
         IF nPartsOnConveyor > 0 THEN
             eStateRemover := R_MOVE_PART;
@@ -41,21 +47,24 @@ CASE eStateRemover OF
 
     R_MOVE_PART:
         SUPER^.Start();
-        fbMovingTimeout.IN := TRUE;
+        SUPER^.fbMovingTimeout.IN := TRUE;
         IF PartAtExit() THEN
-            fbMovingTimeout.IN := FALSE;
-        ELSIF fbMovingTimeout.Q THEN
+            SUPER^.fbMovingTimeout.IN := FALSE;
+        END_IF
+        IF SUPER^.fbMovingTimeout.Q THEN
             {info 'ToDo: throw error message: Part moving timeout'}
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
+            // Reset counter to 0 is moving timeout occurred
             nPartsOnConveyor := 0;
             eStateRemover := R_IDLE;
         END_IF
 
     R_TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
-        fbMovingTimeout.IN := TRUE;
+        SUPER^.fbMovingTimeout.IN := TRUE;
         IF NOT bPartAtExit THEN
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
+            // Decrease counter by one part
             nPartsOnConveyor := nPartsOnConveyor - 1;
             IF nPartsOnConveyor > 0 THEN
                 eStateRemover := R_MOVE_PART;
@@ -64,9 +73,10 @@ CASE eStateRemover OF
                 eStateRemover := R_IDLE;
             END_IF
         END_IF
-        IF fbMovingTimeout.Q THEN
+        IF SUPER^.fbMovingTimeout.Q THEN
             {info 'ToDo: throw error message: Part transfer moving timeout'}
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
+            // Reset counter to 0 is moving timeout occurred
             nPartsOnConveyor := 0;
             eStateRemover := R_IDLE;
         END_IF

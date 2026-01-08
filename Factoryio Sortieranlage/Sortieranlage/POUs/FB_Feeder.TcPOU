@@ -15,42 +15,42 @@ END_VAR
 VAR
     // Enable processing of parts
     bEnable: BOOL;
-    // Part moving timeout
-    fbMovingTimeout: TON;
     // Current state of feeder
     eStateFeeder: (F_IDLE, F_MOVE_PART, F_WAIT_FOR_FOLLOWER, F_TRANSFER_TO_FOLLOWER, F_EMPTY_CONVEYOR, F_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[SUPER^();
-fbMovingTimeout();
+      <ST><![CDATA[// Cyclic calls of function block instances
+SUPER^();
 
+// State machine: feeder
 CASE eStateFeeder OF
     F_IDLE:
         SUPER^.Stop(bRunOut := FALSE);
+        SUPER^.fbMovingTimeout.IN := FALSE;
         IF bEnable THEN
             bEmitter := TRUE;
             eStateFeeder := F_MOVE_PART;
+        ELSE
+            bEmitter := FALSE;
         END_IF
 
     F_MOVE_PART:
         SUPER^.Start();
-        fbMovingTimeout.IN := TRUE;
+        SUPER^.fbMovingTimeout.IN := TRUE;
         IF PartAtExit() THEN
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
         END_IF
-        IF fbMovingTimeout.Q THEN
-            // Throw error message: Part moving timeout
-            fbMovingTimeout.IN := FALSE;
-            bEmitter := FALSE;
+        IF SUPER^.fbMovingTimeout.Q THEN
+            {info 'ToDo: throw error message: Part moving timeout'}
+            SUPER^.fbMovingTimeout.IN := FALSE;
             eStateFeeder := F_IDLE;
         END_IF
 
     F_WAIT_FOR_FOLLOWER:
         SUPER^.Stop(bRunOut := FALSE);
         IF NOT bPartAtExit THEN
-            // Throw message: Part was manual removed
-            bEmitter := FALSE;
+            {info 'ToDo: throw message: Part was manual removed'}
             eStateFeeder := F_IDLE;
         END_IF
         IF bReleasePartTransfer THEN
@@ -59,30 +59,29 @@ CASE eStateFeeder OF
 
     F_TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
-        fbMovingTimeout.IN := TRUE;
+        SUPER^.fbMovingTimeout.IN := TRUE;
         IF NOT bPartAtExit THEN
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
             IF bEnable THEN
                 eStateFeeder := F_MOVE_PART;
             ELSE
                 eStateFeeder := F_EMPTY_CONVEYOR;
             END_IF
         END_IF
-        IF fbMovingTimeout.Q THEN
-            // Throw error message: Part transfer moving timeout
-            fbMovingTimeout.IN := FALSE;
-            bEmitter := FALSE;
+        IF SUPER^.fbMovingTimeout.Q THEN
+            {info 'ToDo: throw error message: Part transfer moving timeout'}
+            SUPER^.fbMovingTimeout.IN := FALSE;
             eStateFeeder := F_IDLE;
         END_IF
 
     F_EMPTY_CONVEYOR:
         bEmitter := FALSE;
-        fbMovingTimeout.IN := TRUE;
+        SUPER^.fbMovingTimeout.IN := TRUE;
         IF PartAtExit() THEN
-            fbMovingTimeout.IN := FALSE;
+            SUPER^.fbMovingTimeout.IN := FALSE;
         END_IF
-        IF fbMovingTimeout.Q THEN
-            fbMovingTimeout.IN := FALSE;
+        IF SUPER^.fbMovingTimeout.Q THEN
+            SUPER^.fbMovingTimeout.IN := FALSE;
             eStateFeeder := F_IDLE;
         END_IF
 END_CASE

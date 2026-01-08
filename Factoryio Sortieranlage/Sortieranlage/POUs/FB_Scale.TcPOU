@@ -25,22 +25,28 @@ END_VAR
 VAR
     // Timeout before store measured weight of part
     fbWeightTimeout: TON;
-    fbPartAtExitFalling: F_TRIG();
+    // Part is complete on distributor
+    fbPartAtDistributor: F_TRIG();
     // Current state of scale
     eStateScale: (S_IDLE, S_MOVE_PART_TO_SCALE, S_WAIT_FOR_MEASUREMENT, S_EXECUTING_MEASUREMENT, S_WAIT_FOR_FOLLOWER, S_TRANSFER_TO_FOLLOWER, S_LOCKOUT);
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[SUPER^();
+      <ST><![CDATA[// Cyclic calls of function block instances
+SUPER^();
 fbWeightTimeout();
-fbPartAtExitFalling(CLK := bPartAtExit);
+fbPartAtDistributor(CLK := bPartAtExit);
 
+// Default to measurement data has not been updated in this cycle
 bWeightIsUpdated := FALSE;
 
+// State machine: 
 CASE eStateScale OF
     S_IDLE:
         SUPER^.Stop(bRunOut := TRUE);
+        SUPER^.fbMovingTimeout.IN := FALSE;
         bReadyToReceivePart := TRUE;
+        fbWeightTimeout.IN := FALSE;
         IF bPartAtEntry THEN
             bReadyToReceivePart := FALSE;
             eStateScale := S_MOVE_PART_TO_SCALE;
@@ -48,8 +54,15 @@ CASE eStateScale OF
 
     S_MOVE_PART_TO_SCALE:
         SUPER^.Start();
+        SUPER^.fbMovingTimeout.IN := TRUE;
         IF bPartOnScale THEN
+            SUPER^.fbMovingTimeout.IN := FALSE;
             eStateScale := S_WAIT_FOR_MEASUREMENT;
+        END_IF
+        IF SUPER^.fbMovingTimeout.Q THEN
+            {info 'ToDo: throw error message: Part moving timeout'}
+            SUPER^.fbMovingTimeout.IN := FALSE;
+            eStateScale := S_IDLE;
         END_IF
  
     S_WAIT_FOR_MEASUREMENT:
@@ -59,14 +72,24 @@ CASE eStateScale OF
             fbWeightTimeout.IN := FALSE;
             eStateScale := S_EXECUTING_MEASUREMENT;
         END_IF
+        IF NOT bPartOnScale THEN
+            {info 'ToDo: throw error message: Part has been removed from scale'}
+            fbWeightTimeout.IN := FALSE;
+            eStateScale := S_IDLE;
+        END_IF
 
     S_EXECUTING_MEASUREMENT:
-        bWeightIsUpdated := TRUE;
-        fWeightOut := fWeightIn;
-        IF bReleasePartTransfer THEN
-            eStateScale := S_TRANSFER_TO_FOLLOWER;
+        IF NOT bPartOnScale THEN
+            {info 'ToDo: throw error message: Part has been removed from scale'}
+            eStateScale := S_IDLE;
         ELSE
-            eStateScale := S_WAIT_FOR_FOLLOWER;
+            bWeightIsUpdated := TRUE;
+            fWeightOut := fWeightIn;
+            IF bReleasePartTransfer THEN
+                eStateScale := S_TRANSFER_TO_FOLLOWER;
+            ELSE
+                eStateScale := S_WAIT_FOR_FOLLOWER;
+            END_IF
         END_IF
 
     S_WAIT_FOR_FOLLOWER:
@@ -76,23 +99,30 @@ CASE eStateScale OF
 
     S_TRANSFER_TO_FOLLOWER:
         SUPER^.Start();
-        IF fbPartAtExitFalling.Q THEN
+        SUPER^.fbMovingTimeout.IN := TRUE;
+        IF fbPartAtDistributor.Q THEN
+            SUPER^.fbMovingTimeout.IN := FALSE;
+            eStateScale := S_IDLE;
+        END_IF
+        IF SUPER^.fbMovingTimeout.Q THEN
+            {info 'ToDo: throw error message: Part moving timeout'}
+            SUPER^.fbMovingTimeout.IN := FALSE;
             eStateScale := S_IDLE;
         END_IF
 END_CASE
 ]]></ST>
     </Implementation>
-    <Property Name="tWaitBeforeMeasure" Id="{124ea750-2d7e-42e4-b4a8-045258bc5dca}">
+    <Property Name="tWeightTimeout" Id="{124ea750-2d7e-42e4-b4a8-045258bc5dca}">
       <Declaration><![CDATA[// Timeout before store measured weight of part
 {attribute 'monitoring' := 'call'}
-PROPERTY tWaitBeforeMeasure : TIME
+PROPERTY tWeightTimeout : TIME
 ]]></Declaration>
       <Get Name="Get" Id="{4045a908-c0fe-448a-b322-dba64860193b}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[tWaitBeforeMeasure := fbWeightTimeout.PT;
+          <ST><![CDATA[tWeightTimeout := fbWeightTimeout.PT;
 ]]></ST>
         </Implementation>
       </Get>
@@ -101,7 +131,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[fbWeightTimeout.PT := tWaitBeforeMeasure;
+          <ST><![CDATA[fbWeightTimeout.PT := tWeightTimeout;
 ]]></ST>
         </Implementation>
       </Set>
