@@ -1,0 +1,331 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Distributor" Id="{1d7147fd-eb71-46ba-9a8f-889c07a1d47d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Distributor EXTENDS FB_Conveyor
+VAR_INPUT
+    // Part is at conveyor entry
+    bPartAtEntry: BOOL;
+    // Part is at forward conveyor exit
+    bPartAtExitForward: BOOL;
+    // Part is at left conveyor exit
+    bPartAtExitLeft: BOOL;
+    // Part is at right conveyor exit
+    bPartAtExitRight: BOOL;
+    // Follower left is ready to receive part
+    bReleasePartTransferLeft: BOOL;
+    // Follower forward is ready to receive part
+    bReleasePartTransferForward: BOOL;
+    // Follower right is ready to receive part
+    bReleasePartTransferRight: BOOL;
+END_VAR
+VAR_OUTPUT
+    // Module is ready to receive part
+    bReadyToReceivePart: BOOL;
+    // Output to left conveyor
+    bConveyorToLeft: BOOL;
+    // Output to right conveyor
+    bConveyorToRight: BOOL;
+END_VAR
+VAR
+    // Part moving timeout
+    fbMovingTimeout: TON;
+    // Part is fully on remover conveyor
+    fbPartAtRemover: F_TRIG();
+    // Selected remover direction for next part
+    eNextRemoverDirection: E_DirectionSelect;
+    // Selected remover direction for current part processed from module
+    eCurrentRemoverDirection: E_DirectionSelect;
+    // Current state of distributor
+    eStateDistributor: (D_IDLE, D_SET_DIRECTION, D_TRANSFER_TO_FOLLOWER, D_WAIT_FOR_FOLLOWER, D_LOCKOUT);
+
+
+    // Pointer to recipe for required part weight to select forward remover
+    pPartsForward: POINTER TO REAL;
+    // Length of recipe array
+    nPartsForwardLength: __UXINT;
+    // Pointer to recipe for required part weight to select left remover
+    pPartsLeft: POINTER TO REAL;
+    // Length of recipe array
+    nPartsLeftLength: __UXINT;
+    // Pointer to recipe for required part weight to select right remover
+    pPartsRight: POINTER TO REAL;
+    // Length of recipe array
+    nPartsRightLength: __UXINT;
+
+    // Tolerated weight deviation
+    {attribute 'hide'}
+    _fPartWeightTolerance: REAL;
+    // Fallback remover direction if weight is not in recipe
+    {attribute 'hide'}
+    _eFallbackRemoverDirection: E_DirectionSelect;
+END_VAR
+VAR_TEMP
+    // Follower is ready to receive part
+    bReleasePartTransfer: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^();
+fbMovingTimeout();
+
+// Based on current direction: part is fully on remover conveyor 
+CASE eCurrentRemoverDirection OF
+    E_DirectionSelect.FORWARD:
+        fbPartAtRemover.CLK := bPartAtExitForward;
+
+    E_DirectionSelect.LEFT:
+        fbPartAtRemover.CLK := bPartAtExitLeft;
+
+    E_DirectionSelect.RIGHT:
+        fbPartAtRemover.CLK := bPartAtExitRight;
+END_CASE
+fbPartAtRemover();
+
+CASE eStateDistributor OF
+    D_IDLE:
+        SUPER^.Stop(bRunOut := TRUE);
+        IF eNextRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
+            eStateDistributor := D_SET_DIRECTION;
+        END_IF
+        IF bPartAtEntry THEN
+            {info 'ToDo: throw warning: unannounced part, moving to fallback direction'}
+            eStateDistributor := D_SET_DIRECTION;
+        END_IF
+
+    D_SET_DIRECTION:
+        IF eNextRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
+            eCurrentRemoverDirection := eNextRemoverDirection;
+            eNextRemoverDirection := E_DirectionSelect.UNDEFINED;
+        ELSE
+            eCurrentRemoverDirection := eFallbackRemoverDirection;
+        END_IF
+
+        CASE eCurrentRemoverDirection OF
+            E_DirectionSelect.FORWARD:
+                bConveyorToLeft := FALSE;
+                bConveyorToRight := FALSE;
+                bReleasePartTransfer := bReleasePartTransferForward;
+
+            E_DirectionSelect.LEFT:
+                bConveyorToLeft := TRUE;
+                bConveyorToRight := FALSE;
+                bReleasePartTransfer := bReleasePartTransferLeft;
+
+            E_DirectionSelect.RIGHT:
+                bConveyorToLeft := FALSE;
+                bConveyorToRight := TRUE;
+                bReleasePartTransfer := bReleasePartTransferRight;
+        END_CASE
+
+        IF bReleasePartTransfer THEN
+            bReadyToReceivePart := TRUE;
+            eStateDistributor := D_TRANSFER_TO_FOLLOWER;
+        ELSE
+            eStateDistributor := D_WAIT_FOR_FOLLOWER;
+        END_IF
+
+    D_WAIT_FOR_FOLLOWER:
+        CASE eCurrentRemoverDirection OF
+            E_DirectionSelect.FORWARD:
+                bReleasePartTransfer := bReleasePartTransferForward;
+
+            E_DirectionSelect.LEFT:
+                bReleasePartTransfer := bReleasePartTransferLeft;
+
+            E_DirectionSelect.RIGHT:
+                bReleasePartTransfer := bReleasePartTransferRight;
+        END_CASE
+
+        IF bReleasePartTransfer THEN
+            bReadyToReceivePart := TRUE;
+            eStateDistributor := D_TRANSFER_TO_FOLLOWER;
+        END_IF
+
+    D_TRANSFER_TO_FOLLOWER:
+        bReadyToReceivePart := FALSE;
+        SUPER^.Start();
+        fbMovingTimeout.IN := TRUE;
+        IF fbPartAtRemover.Q THEN
+            fbMovingTimeout.IN := FALSE;
+            eStateDistributor := D_IDLE;
+        END_IF
+        IF fbMovingTimeout.Q THEN
+            {info 'ToDo: throw error message: Part transfer moving timeout'}
+            fbMovingTimeout.IN := FALSE;
+            eStateDistributor := D_IDLE;
+        END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <Method Name="AnnounceNextPart" Id="{e5b684ce-5fdf-4ef5-9c7e-5eb2e12068bd}">
+      <Declaration><![CDATA[METHOD AnnounceNextPart
+VAR_INPUT
+    // Weight of next receiving part
+    fWeight: REAL;
+END_VAR
+VAR
+    // Lookup index
+	nIndex: __UXINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Check recipe to forward remover
+nIndex := 0;
+WHILE nIndex <= nPartsForwardLength - 1 DO
+    // Lookup fWeight in recipe
+    IF fWeight > pPartsForward[nIndex] - fPartWeightTolerance AND fWeight < pPartsForward[nIndex] + fPartWeightTolerance THEN
+        eNextRemoverDirection := E_DirectionSelect.FORWARD;
+        RETURN;
+    END_IF
+
+    nIndex := nIndex + 1;
+END_WHILE
+
+// Check recipe to left remover
+nIndex := 0;
+WHILE nIndex <= nPartsLeftLength - 1 DO
+    // Lookup fWeight in recipe
+    IF fWeight > pPartsLeft[nIndex] - fPartWeightTolerance AND fWeight < pPartsLeft[nIndex] + fPartWeightTolerance THEN
+        eNextRemoverDirection := E_DirectionSelect.LEFT;
+        RETURN;
+    END_IF
+
+    nIndex := nIndex + 1;
+END_WHILE
+
+// Check recipe to right remover
+nIndex := 0;
+WHILE nIndex <= nPartsRightLength - 1 DO
+    // Lookup fWeight in recipe
+    IF fWeight > pPartsRight[nIndex] - fPartWeightTolerance AND fWeight < pPartsRight[nIndex] + fPartWeightTolerance THEN
+        eNextRemoverDirection := E_DirectionSelect.RIGHT;
+        RETURN;
+    END_IF
+
+    nIndex := nIndex + 1;
+END_WHILE
+
+// Given weight is not in recipe, set fallback direction
+eNextRemoverDirection := eFallbackRemoverDirection;
+{info 'ToDo: throw info message: Fallback remover selected'}
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="eFallbackRemoverDirection" Id="{9f958d1f-a6aa-4675-94bf-86afbf36a35c}">
+      <Declaration><![CDATA[// Fallback remover direction if weight is not in recipe
+{attribute 'monitoring' := 'call'}
+PROPERTY eFallbackRemoverDirection: E_DirectionSelect]]></Declaration>
+      <Get Name="Get" Id="{bbead23a-5cc7-43a3-90c5-d274187894af}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eFallbackRemoverDirection := _eFallbackRemoverDirection;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e21e2fde-6cb1-44ba-bac9-f91dfb2eb4bd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF eFallbackRemoverDirection <> E_DirectionSelect.UNDEFINED THEN
+    _eFallbackRemoverDirection := eFallbackRemoverDirection;
+ELSE
+    _eFallbackRemoverDirection := E_DirectionSelect.FORWARD;
+END_IF
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_Init" Id="{8ccda915-7be0-4cc6-b73b-628f2c240386}">
+      <Declaration><![CDATA[// FB_Init is always available implicitly and it is used primarily for initialization.
+// The return value is not evaluated. For a specific influence, you can also declare the
+// methods explicitly and provide additional code there with the standard initialization
+// code. You can evaluate the return value.
+METHOD FB_Init: BOOL
+VAR_INPUT
+    // TRUE: the retain variables are initialized (reset warm / reset cold)
+    bInitRetains: BOOL;
+    // TRUE: the instance will be copied to the copy code afterward (online change)
+    bInCopyCode: BOOL;
+
+    // Contains the address of the recipe array, use the ADR operator to determine the address
+    pForward: POINTER TO REAL;
+    // Size of the recipe array, use XSIZE operator to determine the size
+    nForwardSize: __UXINT;
+    // Contains the address of the recipe array, use the ADR operator to determine the address
+    pLeft: POINTER TO REAL;
+    // Size of the recipe array, use XSIZE operator to determine the size
+    nLeftSize: __UXINT;
+    // Contains the address of the recipe array, use the ADR operator to determine the address
+    pRight: POINTER TO REAL;
+    // Size of the recipe array, use XSIZE operator to determine the size
+    nRightSize: __UXINT;
+END_VAR
+VAR CONSTANT
+    // REAL size: 4 bytes
+    nTypeSize: __UXINT := 4;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Assign pointers to internal variables
+pPartsForward := pForward;
+pPartsLeft := pLeft;
+pPartsRight := pRight;
+
+// Get number of elements for each recipe array
+nPartsForwardLength := nForwardSize / nTypeSize;
+nPartsLeftLength := nLeftSize / nTypeSize;
+nPartsRightLength := nRightSize / nTypeSize;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="fPartWeightTolerance" Id="{a84d0720-d47e-4bc0-ba4d-01841375d161}">
+      <Declaration><![CDATA[// Tolerated weight deviation
+{attribute 'monitoring' := 'call'}
+PROPERTY fPartWeightTolerance: REAL]]></Declaration>
+      <Get Name="Get" Id="{0a5f53a9-e59a-4de0-9bcc-0028927bbebd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fPartWeightTolerance := _fPartWeightTolerance;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{de614451-92d4-4ce6-bc72-57c7f2421639}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_fPartWeightTolerance := fPartWeightTolerance;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="tMovingTimeout" Id="{fd8b40d3-03d7-429f-95a6-24527044a734}">
+      <Declaration><![CDATA[// Part moving timeout
+{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC tMovingTimeout: TIME
+]]></Declaration>
+      <Get Name="Get" Id="{1e2d5898-33d5-426f-8fff-fa45557239d7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[tMovingTimeout := fbMovingTimeout.PT;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e1c6492d-93e2-49e1-b776-7b0387e97fb5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbMovingTimeout.PT := tMovingTimeout;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>
